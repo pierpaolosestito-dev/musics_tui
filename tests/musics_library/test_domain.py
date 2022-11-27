@@ -115,6 +115,10 @@ def test_email_format():
     for correct in correct_values:
         assert Email(correct)
 
+def test_email_str():
+    assert str(Email("ssdsbm@gmail.com")) == "ssdsbm@gmail.com"
+
+
 
 #PASSWORD
 @pytest.mark.parametrize("wrong_passwords", [("A"), ("aa@"), ("Aa "), ("A-!@"), ("Aaaaa"),("Aaa aa"), ("Aaaaaaa")])
