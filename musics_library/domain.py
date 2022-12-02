@@ -220,7 +220,7 @@ class Music:
             "record_company": self.record_company.value,
             "genre": self.genre.value,
             "ean_code": self.ean_code.value,
-
+            "price":str(self.price)
             #"user": self.published_by.value,
 
         }

@@ -40,18 +40,11 @@ class MusicsService:
         if res.status_code != 200:
             raise ApiException("Request to server not successfull")
         return res.json()
-    def add_music(self,auth_user: AuthenticatedUser):
+    def add_music(self,cd:Music,auth_user: AuthenticatedUser):
+        dict = cd.toDict()
+        dict['published_by'] = auth_user.id
         res = requests.post(url="http://localhost:8000/api/v1/musics/",headers={'Authorization':f'Token {auth_user.key}'},
-                            json={
-                                    "name": "Ciao",
-                                    "artist": "Ciao",
-                                    "record_company": "Ciao",
-                                    "genre": "Reggae",
-                                    "ean_code": "978020137962",
-                                    #"price": "1.00",
-                                    "published_by": auth_user.id
-                            })
-        print(res.status_code)
+                            json=dict)
         if res.status_code != 201:
             raise ApiException("CD creation failed") ## todo bisogna leggere gli errori esatti e stamparli nella tui
         return res.json()
@@ -65,9 +58,10 @@ class MusicsService:
 login_service = LoginService()
 try:
     authenticated_user = login_service.login(Username("ssdsbm28"), Password("pierfabiofabgab"))
-    print(authenticated_user)
+    print("AUTHENTICATED USER: " + authenticated_user)
     music_service = MusicsService()
-    print(music_service.add_music(authenticated_user))
+    cd = Music(Name("Ciao"),Artist("Ciao"),RecordCompany("Ciao"),Genre("Ciao"),EANCode("978020137962"),Username("ssdsbm28"),Price.create(15,50),datetime.now(),datetime.now())
+    print("RESPONSE TO ADD MUSIC: " + music_service.add_music(cd,authenticated_user))
 
 except(ApiException) as e:
     print(e)
