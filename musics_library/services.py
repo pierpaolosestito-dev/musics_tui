@@ -58,10 +58,10 @@ class MusicsService:
 login_service = LoginService()
 try:
     authenticated_user = login_service.login(Username("ssdsbm28"), Password("pierfabiofabgab"))
-    print("AUTHENTICATED USER: " + authenticated_user)
+    print(authenticated_user)
     music_service = MusicsService()
     cd = Music(Name("Ciao"),Artist("Ciao"),RecordCompany("Ciao"),Genre("Ciao"),EANCode("978020137962"),Username("ssdsbm28"),Price.create(15,50),datetime.now(),datetime.now())
-    print("RESPONSE TO ADD MUSIC: " + music_service.add_music(cd,authenticated_user))
+    print(music_service.add_music(cd,authenticated_user))
 
 except(ApiException) as e:
     print(e)
