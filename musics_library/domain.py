@@ -53,6 +53,7 @@ class EANCode:
 
 
 
+#PIGLIARE DA ALVIANO
 @typechecked
 @dataclass(frozen=True,order=True)
 class Price:
@@ -71,7 +72,7 @@ class Email:
     def __str__(self):
         return self.value
 
-
+#TODO created_at - updated_at CREIAMO GIORNI MESI ANNO come value objects oppure usiamo datetime()
 @typechecked
 @dataclass(frozen=True,order=True)
 class Username:
@@ -103,3 +104,4 @@ class Password:
             raise ValueError("Password isn't valid")
 
 
+#TODO User
