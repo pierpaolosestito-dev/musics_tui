@@ -1,6 +1,6 @@
 from valid8 import ValidationError
 
-from musics_library.domain import Password,Name,Artist,RecordCompany,Genre,Username,Email
+from musics_library.domain import Password, Name, Artist, RecordCompany, Genre, Username, Email, EANCode
 import pytest
 
 
@@ -76,6 +76,12 @@ def test_genre_first_letter_is_upper():
     with pytest.raises(ValidationError):
         Genre("rock")
     assert Genre("Rock")
+
+@pytest.mark.parametrize("ean_code", [("978020137962"), ("1845678901001")])
+def test_ean_code(ean_code):
+    assert EANCode(ean_code)
+
+
 def test_genre_str():
     assert str(Genre("Rock")) == "Rock"
 
