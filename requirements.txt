@@ -3,3 +3,4 @@ password-validator
 valid8
 typeguard
 rich
+python-dotenv
