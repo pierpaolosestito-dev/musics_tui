@@ -34,7 +34,7 @@ def test_entry_on_selected():
 
 @patch('builtins.print')
 def test_entry_is_exit_on_selected(mocked_print):
-    entry = Entry(Key('0'), Description('Exit'), on_selected=lambda: print('Bye'), is_exit=True)
+    entry = Entry(Key('0'), Description('Exit'), on_selected=lambda: print('Goodbye, Music Library'), is_exit=True)
     entry.on_selected()
-    mocked_print.assert_any_call('Bye')
+    mocked_print.assert_any_call('Goodbye, Music Library')
 
