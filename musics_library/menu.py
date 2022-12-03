@@ -9,7 +9,7 @@ class Description:
     value: str
 
     def __post_init__(self):
-        validate('Description.value',self.value,min_len=1,max_len=100000,custom=pattern(r'[0-9A-Za-z :.,_-|]*'))
+        validate('Description.value',self.value,min_len=1,max_len=100000,custom=pattern(r'[0-9A-Za-z :.,_-|!]*'))
 
     def __str__(self):
         return self.value
