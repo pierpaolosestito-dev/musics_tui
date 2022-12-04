@@ -2,7 +2,7 @@ from datetime import datetime
 
 import requests
 from dateutil.parser import parser
-from valid8 import ValidationError
+
 from musics_library.domain import Username, Password, Music, EANCode, Genre, RecordCompany, Artist, Name, Price, ID
 from dotenv import load_dotenv
 import os
@@ -13,16 +13,24 @@ load_dotenv()
 music_endpoint = os.getenv('MUSIC_ENDPOINT')
 auth_endpoint = os.getenv('AUTH_ENDPOINT')
 
+class SingletonMeta(type):
+    _instances = {}
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            instance = super().__call__(*args,**kwargs)
+            cls._instances[cls] = instance
+        return cls._instances[cls]
 
-
-class AuthenticatedUser:
-    def __init__(self, key: str,id:int,username:str):
+class AuthenticatedUser(metaclass=SingletonMeta):
+    def __init__(self, key: str,id:ID,username:Username):
         self.key = key
         self.id = id
         self.username = username
 
     def __str__(self):
-        return self.key + " " + str(self.id)
+        return self.key + " " + str(self.id.value)
+
+
 class ApiException(Exception):
     pass
 
@@ -33,7 +41,7 @@ class AuthenticationService:
                                                                     ,"password":password.value})
         if res.status_code != 200:
             raise ApiException("Login not successfull")
-        return AuthenticatedUser(res.json()["key"],res.json()['user']['id'],res.json()['user']['username'])
+        return AuthenticatedUser(res.json()["key"],ID(res.json()['user']['id']),Username(res.json()['user']['username']))
 
     def logout(self,auth_user : AuthenticatedUser):
         res = requests.post(url=auth_endpoint+"logout/",headers={'Authorization': f'Token {auth_user.key}'})
@@ -158,14 +166,15 @@ class MusicsByNameService():
 
 
 
-login_service = AuthenticationService()
-try:
-     authenticated_user = login_service.login(Username("ssdsbm28"), Password("pierfabiofabgab"))
-     print(authenticated_user)
-     music_service = MusicsService()
+# login_service = AuthenticationService()
+# try:
+#      authenticated_user = login_service.login(Username("ssdsbm28"), Password("pierfabiofabgab"))
+#      print(authenticated_user)
+#      music_service = MusicsService()
+#
+#      #cd = Music(Name("DaTUI"), Artist("Ciao"), RecordCompany("Ciao"), Genre("Ciao"), EANCode("978020137962"),Price.create(15, 50))
+#      print(music_service.fetch_musics_list())
+#
+# except(ApiException) as e:
+#      print(e)
 
-     #cd = Music(Name("DaTUI"), Artist("Ciao"), RecordCompany("Ciao"), Genre("Ciao"), EANCode("978020137962"),Price.create(15, 50))
-     print(music_service.fetch_musics_list())
-
-except(ApiException) as e:
-     print(e)
