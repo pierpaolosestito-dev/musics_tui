@@ -1,8 +1,12 @@
 from dataclasses import dataclass,field,InitVar
+
+from art import tprint
+
 from validation.regex import pattern
 from typing import Callable,List,Dict,Any,Optional
 from typeguard import typechecked
 from valid8 import validate
+
 @typechecked
 @dataclass(frozen=True,order=True)
 class Description:
@@ -44,6 +48,8 @@ class Entry:
 @typechecked
 @dataclass(frozen=True)
 class Menu:
+
+
     description: Description
     auto_select: Callable[[],None] = field(default=lambda:None)
     __entries: List[Entry] = field(default_factory=list,repr=False,init=False)
@@ -63,17 +69,19 @@ class Menu:
         return bool(list(filter(lambda e: e.is_exit, self.__entries)))
 
     def __print(self)->None:
-        length = len(str(self.description))
-        fmt = '***{}{}{}***'
-        print("""
-            __     __             __   __        __      
- |\/| |  | /__` | /  `    |    | |__) |__)  /\  |__) \ / 
- |  | \__/ .__/ | \__,    |___ | |__) |  \ /~~\ |  \  |  
-                                                         
-""")
+
+#         length = len(str(self.description))
+#         fmt = '***{}{}{}***'
+#         print("""
+#             __     __             __   __        __
+#  |\/| |  | /__` | /  `    |    | |__) |__)  /\  |__) \ /
+#  |  | \__/ .__/ | \__,    |___ | |__) |  \ /~~\ |  \  |
+#
+# """)
         #print(fmt.format('*','*'*length,'*'))
         #print(fmt.format(' ',self.description.value,' '))
         #print(fmt.format('*','*'*length,'*'))
+        tprint(self.description.value)
         self.auto_select()
         for entry in self.__entries:
             print(f'{entry.key}:\t{entry.description}')

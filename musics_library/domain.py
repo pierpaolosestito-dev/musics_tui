@@ -3,9 +3,11 @@ from datetime import datetime
 
 from password_validator import PasswordValidator
 from typeguard import typechecked
-from typing import Any
+from typing import Any, List
 from dataclasses import dataclass, InitVar, field
 from valid8 import validate, ValidationError
+
+
 from validation.regex import pattern
 import re
 from stdnum.util import clean, isdigits
@@ -229,11 +231,38 @@ class Music:
         return self.id
 
 
+@typechecked
+@dataclass(frozen=True)
+class MusicLibrary:
+    #Ho un problema, se importo MusicsService qua dentro mi da un problema di\
+    #Circular Import perché dentro MusicsService usiamo alcune classi del domain.
+    def musics(self):
+        pass
+
+    def music(self):
+        pass
+
+    def add_music(self,music:Music):
+        pass
+
+    def update_music(self,music:Music):
+        pass
+
+
+    def remove_music(self,id:ID):
+        pass
+
+    def musics_by_artist(self,artist:Artist):
+        pass
+
+    def musics_by_published_by(self,published_by:Username):
+        pass
+
+    def musics_by_cd_name(self,cd_name:Name):
+        pass
+
+    def sort_musics_by_price(self):
+        pass
 
 
 
-
-
-
-
-# TODO User

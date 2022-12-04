@@ -34,6 +34,7 @@ class AuthenticatedUser(metaclass=SingletonMeta):
 class ApiException(Exception):
     pass
 
+
 class AuthenticationService:
     #User
     def login(self,username:Username,password:Password):
@@ -49,7 +50,9 @@ class AuthenticationService:
             raise ApiException("Logout not successfull")
         return res.json()
 
+
 class MusicsService:
+
 
     def __to_dict(self, cd:Music):  # toDict attuale è stato creato per far funzionare la POST. #requests.put(url,json=cd.toDict()) NO ES POSIBLE. nella Delete invece, dobbiamo solo spostarci ID
             return {
@@ -60,6 +63,7 @@ class MusicsService:
                 "ean_code": cd.ean_code.value,
                 "price": str(cd.price)
             }
+
 
     def fetch_musics_list(self):#Lista di Musics -> un Array, o un List della libreria typing #TODO MIGLIORARE return e gestione errori
         res = requests.get(url=music_endpoint)
@@ -92,7 +96,22 @@ class MusicsService:
         res = requests.get(url=music_endpoint+str(cd_id.value)+"/")
         if res.status_code != 200:
             raise ApiException("Request to server not successfull")
-        return res.json()
+        i = res.json()
+        created_at = parser.parse(i['created_at'])
+        updated_at = parser.parse(i['updated_at'])
+        cd = Music( \
+            ID(i['id']), \
+            Name(i['name']), \
+            Artist(i['artist']), \
+            RecordCompany(i['record_company']), \
+            Genre(i['genre']), \
+            EANCode(i['ean_code']), \
+            Username(i['user']), \
+            Price.parse(i['price']), \
+            created_at, \
+            updated_at
+        )
+        return cd
 
     def add_music(self,cd:Music,auth_user: AuthenticatedUser):
         dict = self.__to_dict(cd)
@@ -102,7 +121,22 @@ class MusicsService:
                             json=dict)
         if res.status_code != 201:
             raise ApiException("CD creation failed") ## todo bisogna leggere gli errori esatti e stamparli nella tui
-        return res.json()
+        i = res.json()
+        created_at = parser.parse(i['created_at'])
+        updated_at = parser.parse(i['updated_at'])
+        cd = Music( \
+            ID(i['id']), \
+            Name(i['name']), \
+            Artist(i['artist']), \
+            RecordCompany(i['record_company']), \
+            Genre(i['genre']), \
+            EANCode(i['ean_code']), \
+            Username(i['user']), \
+            Price.parse(i['price']), \
+            created_at, \
+            updated_at
+        )
+        return cd
 
 
     def update_music(self,cd:Music,auth_user : AuthenticatedUser):
@@ -112,7 +146,7 @@ class MusicsService:
         res = requests.put(url=music_endpoint+str(cd.id.value)+"/",headers={'Authorization':f'Token {auth_user.key}'},
                            json=dict)
         if res.status_code != 200:
-            raise ApiException("CD update failed") #Nella POST abbiamo il problema che potremmo specificare un'altro published by
+            raise ApiException("CD update failed")
         return True
 
     def remove_music(self,cd_id:ID,auth_user:AuthenticatedUser):

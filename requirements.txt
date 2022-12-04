@@ -4,3 +4,4 @@ valid8
 typeguard
 rich
 python-dotenv
+art
