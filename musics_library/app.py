@@ -1,10 +1,15 @@
 from musics_library.domain import Username, Email, Password
 from musics_library.menu import Menu,Entry,Description
 from typing import Callable,Any
+
+from musics_library.services import AuthenticationService
+
+
 class App:
 
 
     def __init__(self):
+        self.login_service = AuthenticationService()
         self.menu = Menu.Builder(Description("Music Library"),auto_select=lambda:self.__print_welcome())\
              \
             .with_entry(Entry.create('1', 'Add CD', on_selected=lambda: print("Ciao"))) \
@@ -17,7 +22,15 @@ class App:
             .with_entry(Entry.create('8', 'Login', on_selected=lambda: self.__read_user())) \
             .with_entry(Entry.create('0', 'Exit', on_selected=lambda: print('Bye'),is_exit=True))\
             .build()
-        #self.__dealer = Dealer()
+        #self.__music_library = MusicLibrary()
+        #PSEUDOCODICE MUSIC LIBRARY
+        #def __init__():
+        # self.music_service = MusicService()
+        # self.music_by_artist...bla bla bla
+        #
+        # def musics():
+        # questo chiamata music_service.fetch_list() e ritorna la lista.
+        # def
 
     def __print_welcome(self)->None:
         print("Welcome")

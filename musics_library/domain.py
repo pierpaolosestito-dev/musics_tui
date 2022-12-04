@@ -10,6 +10,16 @@ from validation.regex import pattern
 import re
 from stdnum.util import clean, isdigits
 
+@typechecked
+@dataclass(frozen=True,order=True)
+class ID:
+    value: int
+
+    def __post_init__(self):
+        validate('value',self.value,min_value=0)
+
+    def __str__(self):
+        return self.value
 
 @typechecked
 @dataclass(frozen=True, order=True)
@@ -176,7 +186,7 @@ class Username:
     value: str
 
     def __post_init__(self):
-        validate('value', self.value, min_len=1, max_len=150, custom=pattern(r'[A-Za-z0-9]*'))
+        validate('value', self.value, min_len=1, max_len=150, custom=pattern(r'[A-Za-z0-9-]*'))
 
     def __str__(self):
         return self.value
@@ -201,8 +211,9 @@ class Password:
 
 
 @typechecked
-@dataclass(frozen=True, order=True)
+@dataclass(frozen=True)
 class Music:
+    id: ID
     name: Name
     artist: Artist
     record_company: RecordCompany
@@ -213,52 +224,16 @@ class Music:
     created_at: datetime
     updated_at: datetime
 
-    def toDict(self):
-        return {
-            "name": self.name.value,
-            "artist": self.artist.value,
-            "record_company": self.record_company.value,
-            "genre": self.genre.value,
-            "ean_code": self.ean_code.value,
-            "price":str(self.price)
-            #"user": self.published_by.value,
+    @property
+    def music_id(self):
+        return self.id
 
-        }
-    # @property
-    # def name(self):
-    #     return self.name
-    #
-    # @property
-    # def artist(self):
-    #     return self.artist
-    #
-    # @property
-    # def record_company(self):
-    #     return self.record_company
-    #
-    # @property
-    # def genre(self):
-    #     return self.genre
-    #
-    # @property
-    # def ean_code(self):
-    #     return self.ean_code
-    #
-    # @property
-    # def published_by(self):
-    #     return self.published_by
-    #
-    # @property
-    # def price(self):
-    #     return self.price
-    #
-    # @property
-    # def created_at(self):
-    #     return self.created_at
-    #
-    # @property
-    # def updated_at(self):
-    #     return self.updated_at
+
+
+
+
+
+
 
 
 # TODO User

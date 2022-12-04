@@ -1,9 +1,17 @@
 from valid8 import ValidationError
 
-from musics_library.domain import Password, Name, Artist, RecordCompany, Genre, Username, Email, EANCode
+from musics_library.domain import ID,Password, Name, Artist, RecordCompany, Genre, Username, Email, EANCode
 import pytest
 
+#ID
+def test_negative_id_raises_exception():
+    with pytest.raises(ValidationError):
+        ID(-1)
 
+def test_positive_id_is_correct():
+    correct_values = [1,2,3,4,5]
+    for correct in correct_values:
+        assert ID(correct)
 #NAME
 def test_empty_name_raises_exception():
     with pytest.raises(ValidationError):
