@@ -38,18 +38,17 @@ class Entry:
     description: Description
     on_selected: Callable[[],None] = field(default=lambda:None)
     is_exit : bool = field(default=False)
+    is_hidden : bool = field(default=False)
 
     @staticmethod
-    def create(key:str,description:str,on_selected:Callable[[],None]=lambda:None,is_exit:bool=False)->'Entry':
-        return Entry(Key(key),Description(description),on_selected,is_exit)
+    def create(key:str,description:str,on_selected:Callable[[],None]=lambda:None,is_exit:bool=False,is_hidden:bool=False)->'Entry':
+        return Entry(Key(key),Description(description),on_selected,is_exit,is_hidden)
 
 
 #MENU
 @typechecked
 @dataclass(frozen=True)
 class Menu:
-
-
     description: Description
     auto_select: Callable[[],None] = field(default=lambda:None)
     __entries: List[Entry] = field(default_factory=list,repr=False,init=False)
@@ -59,32 +58,23 @@ class Menu:
     def __post_init__(self, create_key: Any):
         validate('create_key',create_key,custom=Menu.Builder.is_valid_key)
 
+
     def _add_entry(self,value:Entry,create_key:Any)->None:
         validate('create_key',create_key,custom=Menu.Builder.is_valid_key)
         validate('value.key',value.key,custom=lambda v : v not in self.__key2entry)
         self.__entries.append(value)
         self.__key2entry[value.key] = value
 
+
     def _has_exit(self)->bool:
         return bool(list(filter(lambda e: e.is_exit, self.__entries)))
 
     def __print(self)->None:
-
-#         length = len(str(self.description))
-#         fmt = '***{}{}{}***'
-#         print("""
-#             __     __             __   __        __
-#  |\/| |  | /__` | /  `    |    | |__) |__)  /\  |__) \ /
-#  |  | \__/ .__/ | \__,    |___ | |__) |  \ /~~\ |  \  |
-#
-# """)
-        #print(fmt.format('*','*'*length,'*'))
-        #print(fmt.format(' ',self.description.value,' '))
-        #print(fmt.format('*','*'*length,'*'))
         tprint(self.description.value)
         self.auto_select()
         for entry in self.__entries:
-            print(f'{entry.key}:\t{entry.description}')
+            if not entry.is_hidden:
+                print(f'{entry.key}:\t{entry.description}')
 
     def __select_from_input(self)->bool:
         while True:
@@ -92,11 +82,13 @@ class Menu:
                 line = input("? ")
                 key = Key(line.strip())
                 entry = self.__key2entry[key]
+                if entry.is_hidden:
+                    raise Exception
                 entry.on_selected()
                 return entry.is_exit
             except(Exception) as e:
-                print(e)
-                print("Invalid selection. Please, try again...")
+                 print(e)
+                 print("Invalid selection. Please, try again...")
 
     def run(self)->None:
         while True:
@@ -123,8 +115,11 @@ class Menu:
             self.__menu._add_entry(value,self.__create_key)
             return self
 
+
+
         def build(self)->'Menu':
             validate('menu',self.__menu)
             validate('menu.entries',self.__menu._has_exit(),equals=True)
             res,self.__menu = self.__menu,None
             return res
+

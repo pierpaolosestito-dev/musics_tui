@@ -3,7 +3,7 @@ from datetime import datetime
 
 from password_validator import PasswordValidator
 from typeguard import typechecked
-from typing import Any, List
+from typing import Any, List,Optional
 from dataclasses import dataclass, InitVar, field
 from valid8 import validate, ValidationError
 
@@ -20,6 +20,9 @@ class ID:
     def __post_init__(self):
         validate('value',self.value,min_value=0)
 
+    @staticmethod
+    def parse(value:str) -> 'ID':
+        return ID(int(value))
     def __str__(self):
         return self.value
 
@@ -202,7 +205,7 @@ class Password:
     def __post_init__(self):
         schema = PasswordValidator()
         schema \
-            .min(8) \
+            .min(3) \
             .max(128) \
             .has().no().spaces() \
             .has().lowercase() \
@@ -213,56 +216,30 @@ class Password:
 
 
 @typechecked
-@dataclass(frozen=True)
+@dataclass()
 class Music:
-    id: ID
+    id: ID#Optional['ID'] = field(default=None,init=False)
     name: Name
     artist: Artist
     record_company: RecordCompany
     genre: Genre
     ean_code: EANCode
-    published_by: Username
+    published_by: Username#Optional['Username'] = field(default=None,init=False)
     price: Price
-    created_at: datetime
-    updated_at: datetime
+    created_at: datetime#Optional['datetime'] = field(default=None,init=False)
+    updated_at: datetime#Optional['datetime'] = field(default=None,init=False)
 
+    #Music.create(...)
+    @staticmethod
+    def create():
+        pass
+    def __str__(self):
+        return self.name.value
+    #NAME,ARTIST,RECORD_COMPANY,GENRE,EAN_CODE,PRICE
     @property
     def music_id(self):
         return self.id
 
 
-@typechecked
-@dataclass(frozen=True)
-class MusicLibrary:
-    #Ho un problema, se importo MusicsService qua dentro mi da un problema di\
-    #Circular Import perché dentro MusicsService usiamo alcune classi del domain.
-    def musics(self):
-        pass
-
-    def music(self):
-        pass
-
-    def add_music(self,music:Music):
-        pass
-
-    def update_music(self,music:Music):
-        pass
-
-
-    def remove_music(self,id:ID):
-        pass
-
-    def musics_by_artist(self,artist:Artist):
-        pass
-
-    def musics_by_published_by(self,published_by:Username):
-        pass
-
-    def musics_by_cd_name(self,cd_name:Name):
-        pass
-
-    def sort_musics_by_price(self):
-        pass
-
-
+#MusicLibrary in services.py o Music_Library in app.py
 

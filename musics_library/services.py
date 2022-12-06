@@ -1,7 +1,9 @@
+from dataclasses import dataclass,field
 from datetime import datetime
 
 import requests
 from dateutil.parser import parser
+from typeguard import typechecked
 
 from musics_library.domain import Username, Password, Music, EANCode, Genre, RecordCompany, Artist, Name, Price, ID
 from dotenv import load_dotenv
@@ -52,8 +54,8 @@ class AuthenticationService:
 
 
 class MusicsService:
-
-
+    #musicslibrary.domain import Music
+    authenticated_user = AuthenticatedUser
     def __to_dict(self, cd:Music):  # toDict attuale è stato creato per far funzionare la POST. #requests.put(url,json=cd.toDict()) NO ES POSIBLE. nella Delete invece, dobbiamo solo spostarci ID
             return {
                 "name": cd.name.value,
@@ -115,28 +117,13 @@ class MusicsService:
 
     def add_music(self,cd:Music,auth_user: AuthenticatedUser):
         dict = self.__to_dict(cd)
-        dict['published_by'] = auth_user.id
+        dict['published_by'] = auth_user.id.value
 
         res = requests.post(url=music_endpoint,headers={'Authorization':f'Token {auth_user.key}'},
                             json=dict)
         if res.status_code != 201:
             raise ApiException("CD creation failed") ## todo bisogna leggere gli errori esatti e stamparli nella tui
-        i = res.json()
-        created_at = parser.parse(i['created_at'])
-        updated_at = parser.parse(i['updated_at'])
-        cd = Music( \
-            ID(i['id']), \
-            Name(i['name']), \
-            Artist(i['artist']), \
-            RecordCompany(i['record_company']), \
-            Genre(i['genre']), \
-            EANCode(i['ean_code']), \
-            Username(i['user']), \
-            Price.parse(i['price']), \
-            created_at, \
-            updated_at
-        )
-        return cd
+        return True
 
 
     def update_music(self,cd:Music,auth_user : AuthenticatedUser):
@@ -150,6 +137,7 @@ class MusicsService:
         return True
 
     def remove_music(self,cd_id:ID,auth_user:AuthenticatedUser):
+        print("Cazz")
         res = requests.delete(url=music_endpoint+str(cd_id.value)+"/",headers={'Authorization':f'Token {auth_user.key}'})
         if res.status_code != 204:
             raise ApiException("CD delete failed")
@@ -197,6 +185,45 @@ class MusicsByNameService():
         if res.status_code != 200:
             raise ApiException("Request to server not successfull")
         return res.json()
+
+@typechecked
+class MusicLibrary:
+
+    musics_service: MusicsService
+    musics_by_artists_service : MusicsByArtistService
+    musics_by_published_by_service : MusicsByPublishedByService
+    musics_by_cd_name_service : MusicsByNameService
+
+
+    def __init__(self):
+        self.musics_service = MusicsService()
+        self.musics_by_artists_service = MusicsByArtistService()
+        self.musics_by_published_by_service = MusicsByPublishedByService()
+        self.musics_by_cd_name_service = MusicsByNameService()
+
+    def musics(self):
+        return self.musics_service.fetch_musics_list()
+
+    def music(self,id:ID):
+        return self.musics_service.fetch_music_detail(id)
+
+    def add_music(self,music:Music,auth_user:AuthenticatedUser):
+        return self.musics_service.add_music(music,auth_user)
+
+    def update_music(self,music:Music,auth_user:AuthenticatedUser):
+        return self.musics_service.update_music(music,auth_user)
+
+    def remove_music(self,id:ID,auth_user:AuthenticatedUser):
+        return self.musics_service.remove_music(id,auth_user)
+
+    def musics_by_artist(self,artist:Artist):
+        return self.musics_by_artists_service.fetch_musics_by_artist_list(artist)
+
+    def musics_by_published_by(self,published_by:Username):
+        return self.musics_by_published_by_service.fetch_musics_by_published_by_list(published_by)
+
+    def musics_by_cd_name(self,cd_name:Name):
+        return self.musics_by_cd_name_service.fetch_musics_by_name_list(cd_name)
 
 
 
