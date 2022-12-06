@@ -143,23 +143,7 @@ class MusicsService:
             raise ApiException("CD delete failed")
         return True
 
-    def update_music_name(self,cd_music_name:Name,auth_user:AuthenticatedUser):
-        pass
 
-    def update_music_artist_name(self,cd_artist_name:Artist,auth_user:AuthenticatedUser):
-        pass
-
-    def update_music_record_company_name(self,cd_record_company_name:RecordCompany,auth_user:AuthenticatedUser):
-        pass
-
-    def update_music_ean_code(self,cd_ean_code:EANCode,auth_user:AuthenticatedUser):
-        pass
-
-    def update_music_price(self,cd:Music,auth_user:AuthenticatedUser):
-        pass
-
-    def remove_music(self,cd:Music,auth_user:AuthenticatedUser):
-        pass
 
 
 class MusicsByArtistService():
@@ -214,6 +198,7 @@ class MusicLibrary:
         return self.musics_service.update_music(music,auth_user)
 
     def remove_music(self,id:ID,auth_user:AuthenticatedUser):
+        print("Before Cazz")
         return self.musics_service.remove_music(id,auth_user)
 
     def musics_by_artist(self,artist:Artist):
@@ -229,13 +214,13 @@ class MusicLibrary:
 
 # login_service = AuthenticationService()
 # try:
-#      authenticated_user = login_service.login(Username("ssdsbm28"), Password("pierfabiofabgab"))
-#      print(authenticated_user)
-#      music_service = MusicsService()
+#       authenticated_user = login_service.login(Username("ssdsbm"), Password("ssdsbm"))
+#       print(authenticated_user)
+#       music_service = MusicsService()
 #
-#      #cd = Music(Name("DaTUI"), Artist("Ciao"), RecordCompany("Ciao"), Genre("Ciao"), EANCode("978020137962"),Price.create(15, 50))
-#      print(music_service.fetch_musics_list())
+#       #cd = Music(Name("DaTUI"), Artist("Ciao"), RecordCompany("Ciao"), Genre("Ciao"), EANCode("978020137962"),Price.create(15, 50))
+#       print(music_service.remove_musica(ID(49),authenticated_user))
 #
 # except(ApiException) as e:
-#      print(e)
+#       print(e)
 

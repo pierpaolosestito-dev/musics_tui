@@ -5,7 +5,8 @@ from art import tprint
 from validation.regex import pattern
 from typing import Callable,List,Dict,Any,Optional
 from typeguard import typechecked
-from valid8 import validate
+from valid8 import validate, ValidationError
+
 
 @typechecked
 @dataclass(frozen=True,order=True)
@@ -39,10 +40,11 @@ class Entry:
     on_selected: Callable[[],None] = field(default=lambda:None)
     is_exit : bool = field(default=False)
     is_hidden : bool = field(default=False)
+    visibility_or_not : Callable[[],None] = field(default=lambda:None)
 
     @staticmethod
-    def create(key:str,description:str,on_selected:Callable[[],None]=lambda:None,is_exit:bool=False,is_hidden:bool=False)->'Entry':
-        return Entry(Key(key),Description(description),on_selected,is_exit,is_hidden)
+    def create(key:str,description:str,on_selected:Callable[[],None]=lambda:None,is_exit:bool=False,visibility_or_not:Callable[[],None]=lambda:None)->'Entry':
+        return Entry(Key(key),Description(description),on_selected,is_exit)
 
 
 #MENU
@@ -57,6 +59,8 @@ class Menu:
 
     def __post_init__(self, create_key: Any):
         validate('create_key',create_key,custom=Menu.Builder.is_valid_key)
+
+
 
 
     def _add_entry(self,value:Entry,create_key:Any)->None:
