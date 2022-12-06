@@ -40,7 +40,6 @@ class App:
     def __add_music(self):
         music = Music(*self.__read_add_cd())
         y_or_n = Confirm.ask("Are you sure?")
-        print(self.authenticated_user)
         if y_or_n:
             self.music_library.add_music(music,self.authenticated_user)
         else:
