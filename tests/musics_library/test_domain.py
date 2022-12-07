@@ -1,6 +1,6 @@
 from valid8 import ValidationError
 
-from musics_library.domain import ID,Password, Name, Artist, RecordCompany, Genre, Username, Email, EANCode
+from musics_library.domain import ID,Password, Name, Artist, RecordCompany, Genre, Username, EANCode, Price
 import pytest
 
 #ID
@@ -12,6 +12,9 @@ def test_positive_id_is_correct():
     correct_values = [1,2,3,4,5]
     for correct in correct_values:
         assert ID(correct)
+
+def test_str_id():
+    assert str(ID(1)) == "1"
 #NAME
 def test_empty_name_raises_exception():
     with pytest.raises(ValidationError):
@@ -85,13 +88,51 @@ def test_genre_first_letter_is_upper():
         Genre("rock")
     assert Genre("Rock")
 
+#EAN_CODE
 @pytest.mark.parametrize("ean_code", [("978020137962"), ("1845678901001")])
-def test_ean_code(ean_code):
+def test_correct_ean_code(ean_code):
     assert EANCode(ean_code)
 
+@pytest.mark.parametrize("wrong_ean_code",[("124214"),("1234567"),("1234567810")])
+def test_wrong_ean_code_raises_exception(wrong_ean_code):
+     with pytest.raises(Exception):
+         EANCode(wrong_ean_code)
+def test_str_ean_code():
+    assert str("978020137962") == "978020137962"
 
 def test_genre_str():
     assert str(Genre("Rock")) == "Rock"
+
+
+#PRICE
+def test_price_no_init():
+    with pytest.raises(ValidationError):
+        Price(1)
+
+def test_price_cannot_be_negative():
+    with pytest.raises(ValidationError):
+        Price.create(-1,0)
+
+def test_price_no_cents():
+    assert Price.create(1,0) == Price.create(1)
+
+def test_price_parse():
+    assert Price.parse('10.20') == Price.create(10,20)
+
+def test_price_str():
+    assert str(Price.create(9,99)) == '9.99'
+
+def test_price_euro():
+    assert Price.create(11,22).euro == 11
+
+def test_price_cents():
+    assert Price.create(11,22).cents == 22
+
+def test_price_add():
+    assert Price.create(9,99).add(Price.create(0,1)) == Price.create(10)
+
+def test_price_omitted_cents():
+    assert Price.create(11)
 
 #USERNAME
 def test_empty_username_raises_exception():
@@ -102,6 +143,8 @@ def test_username_of_length_151_raises_exception():
     with pytest.raises(ValidationError):
         Username("A"*151)
 
+def test_str_username():
+    assert str(Username("ssdsbm")) == "ssdsbm"
 def test_username_only_accepts_characters_and_numbers():
     wrong_values = ["u'@-sername","u\sername123","u!ser"]
     for wrong in wrong_values:
@@ -112,25 +155,11 @@ def test_username_only_accepts_characters_and_numbers():
         assert Username(correct)
 
 #EMAIL
-def test_empty_email_raises_exception():
-    with pytest.raises(ValidationError):
-        Email("")
 
-def test_email_of_length_151_raises_exception():
-    with pytest.raises(ValidationError):
-        Email("p"*146+"@a.it")
 
-def test_email_format():
-    wrong_values = ["wrong_email@it","anotherwrongemail.it"]
-    for wrong in wrong_values:
-        with pytest.raises(ValidationError):
-            Email(wrong)
-    correct_values = ["correct_email@gmail.com","correct.email@libero.it","correct12_email@yahoo.it"]
-    for correct in correct_values:
-        assert Email(correct)
 
-def test_email_str():
-    assert str(Email("ssdsbm@gmail.com")) == "ssdsbm@gmail.com"
+
+
 
 
 

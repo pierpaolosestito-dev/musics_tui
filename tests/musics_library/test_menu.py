@@ -3,7 +3,8 @@ from unittest.mock import Mock, patch
 import pytest
 from valid8 import ValidationError
 
-from musics_library.menu import Entry,Key,Description
+from musics_library.menu import Entry, Key, Description, Menu
+
 
 def test_empty_description_raises_exception():
     with pytest.raises(ValidationError):
@@ -36,5 +37,27 @@ def test_entry_on_selected():
 def test_entry_is_exit_on_selected(mocked_print):
     entry = Entry(Key('0'), Description('Exit'), on_selected=lambda: print('Goodbye, Music Library'), is_exit=True)
     entry.on_selected()
-    mocked_print.assert_any_call('Goodbye, Music Library')
+    mocked_print.assert_called_with('Goodbye, Music Library')
+
+@patch('builtins.input',side_effect=['1','0'])
+@patch('builtins.print')
+def test_menu_selection_call_on_selected(mocked_print,mocked_input):
+    menu = Menu.Builder(Description('Test Menu'))\
+        .with_entry(Entry.create('1','first_entry',on_selected=lambda:print('first entry selected')))\
+        .with_entry(Entry.create('0','exit',is_exit=True))\
+        .build()
+    menu.run()
+    mocked_print.assert_any_call('first entry selected')
+    mocked_input.assert_called()
+
+@patch('builtins.input',side_effect=['-1','0'])
+@patch('builtins.print')
+def test_menu_selection_on_wrong_key(mocked_print,mocked_input):
+    menu = Menu.Builder(Description('Test Menu')) \
+        .with_entry(Entry.create('1', 'first_entry', on_selected=lambda: print('first entry selected'))) \
+        .with_entry(Entry.create('0', 'exit', is_exit=True)) \
+        .build()
+    menu.run()
+    mocked_print.assert_any_call('Invalid selection. Please, try again...')
+    mocked_input.assert_called()
 

@@ -37,26 +37,31 @@ class AuthenticatedUser(metaclass=SingletonMeta):
 class ApiException(Exception):
     pass
 
-
+CONNECTION_ERROR = "Check your network connection or retry later."
+LOGIN_ERROR = "Login not successfull"
+LOGOUT_ERROR = "Logout not successfull"
+GET_TO_SERVER_FAILED_ERROR = "The desired operation has failed. Try later"
+POST_PUT_DELETE_ERROR = GET_TO_SERVER_FAILED_ERROR + "or check your data"
 class AuthenticationService:
     #User
     def login(self,username:Username,password:Password):
         res = requests.post(url=auth_endpoint+"login/",json={"username":username.value\
                                                                     ,"password":password.value})
         if res.status_code != 200:
-            raise ApiException("Login not successfull")
+            raise ApiException(LOGIN_ERROR)
         return AuthenticatedUser(res.json()["key"],ID(res.json()['user']['id']),Username(res.json()['user']['username']))
 
     def logout(self,auth_user : AuthenticatedUser):
         res = requests.post(url=auth_endpoint+"logout/",headers={'Authorization': f'Token {auth_user.key}'})
         if res.status_code != 200:
-            raise ApiException("Logout not successfull")
+            raise ApiException(LOGOUT_ERROR)
         return res.json()
 
 
 class MusicsService:
     #musicslibrary.domain import Music
     authenticated_user = AuthenticatedUser
+
     def __to_dict(self, cd:Music):  # toDict attuale è stato creato per far funzionare la POST. #requests.put(url,json=cd.toDict()) NO ES POSIBLE. nella Delete invece, dobbiamo solo spostarci ID
             return {
                 "name": cd.name.value,
@@ -69,9 +74,12 @@ class MusicsService:
 
 
     def fetch_musics_list(self):#Lista di Musics -> un Array, o un List della libreria typing #TODO MIGLIORARE return e gestione errori
-        res = requests.get(url=music_endpoint)
+        try:
+            res = requests.get(url=music_endpoint)
+        except:
+            raise ApiException(CONNECTION_ERROR)
         if res.status_code != 200:
-            raise ApiException("Request to server not successfull")
+            raise ApiException(GET_TO_SERVER_FAILED_ERROR)
         cds = []
         for i in res.json():
             created_at = parser.parse(i['created_at'])
@@ -96,9 +104,12 @@ class MusicsService:
 
 
     def fetch_music_detail(self,cd_id:ID):
-        res = requests.get(url=music_endpoint+str(cd_id.value)+"/")
+        try:
+            res = requests.get(url=music_endpoint+str(cd_id.value)+"/")
+        except:
+            raise ApiException(CONNECTION_ERROR)
         if res.status_code != 200:
-            raise ApiException("Request to server not successfull")
+            raise ApiException(GET_TO_SERVER_FAILED_ERROR)
         i = res.json()
         created_at = parser.parse(i['created_at'])
         updated_at = parser.parse(i['updated_at'])
@@ -120,10 +131,13 @@ class MusicsService:
         dict = self.__to_dict(cd)
         dict['published_by'] = auth_user.id.value
 
-        res = requests.post(url=music_endpoint,headers={'Authorization':f'Token {auth_user.key}'},
+        try:
+            res = requests.post(url=music_endpoint,headers={'Authorization':f'Token {auth_user.key}'},
                             json=dict)
+        except:
+            raise ApiException(CONNECTION_ERROR)
         if res.status_code != 201:
-            raise ApiException("CD creation failed") ## todo bisogna leggere gli errori esatti e stamparli nella tui
+            raise ApiException(GET_TO_SERVER_FAILED_ERROR) ## todo bisogna leggere gli errori esatti e stamparli nella tui
         i = res.json()
         created_at = parser.parse(i['created_at'])
         updated_at = parser.parse(i['updated_at'])
@@ -146,44 +160,59 @@ class MusicsService:
         dict = self.__to_dict(cd)
         dict['id'] = cd.id.value
         dict['published_by'] = auth_user.id
-        res = requests.put(url=music_endpoint+str(cd.id.value)+"/",headers={'Authorization':f'Token {auth_user.key}'},
+        try:
+            res = requests.put(url=music_endpoint+str(cd.id.value)+"/",headers={'Authorization':f'Token {auth_user.key}'},
                            json=dict)
+        except:
+            raise ApiException(CONNECTION_ERROR)
+
         if res.status_code != 200:
-            raise ApiException("CD update failed")
+            raise ApiException(POST_PUT_DELETE_ERROR)
         return True
 
     def remove_music(self,cd_id:ID,auth_user:AuthenticatedUser):
-        print("Cazz")
-        res = requests.delete(url=music_endpoint+str(cd_id.value)+"/",headers={'Authorization':f'Token {auth_user.key}'})
+        try:
+            res = requests.delete(url=music_endpoint+str(cd_id.value)+"/",headers={'Authorization':f'Token {auth_user.key}'})
+        except:
+            raise ApiException(CONNECTION_ERROR)
         if res.status_code != 204:
-            raise ApiException("CD delete failed")
+            raise ApiException(POST_PUT_DELETE_ERROR)
         return True
-
-
 
 
 class MusicsByArtistService():
     #http://localhost:8000/api/v1/musics/byartist?artist=ciccio
     def fetch_musics_by_artist_list(self,artist_name:Artist): #TODO Qua potremmo anche toglierlo auth_user perché le GET le facciamo fare anche a chi non è in possesso di un token.
-        res = requests.get(url=music_endpoint+"byartist?artist="+artist_name.value)
+        try:
+            res = requests.get(url=music_endpoint+"byartist?artist="+artist_name.value)
+        except:
+            raise ApiException(CONNECTION_ERROR)
         if res.status_code != 200:
-            raise ApiException("Request to server not successfull")
+            raise ApiException(GET_TO_SERVER_FAILED_ERROR)
         return res.json()
 
 class MusicsByPublishedByService():
     # http://localhost:8000/api/v1/musics/by_published_by?published_by=ciccio
     def fetch_musics_by_published_by_list(self,published_by:Username):
-        res = requests.get(url=music_endpoint+"by_published_by?published_by=" + published_by.value)
+
+        try:
+            res = requests.get(url=music_endpoint+"by_published_by?published_by=" + published_by.value)
+        except:
+            raise ApiException(CONNECTION_ERROR)
+
         if res.status_code != 200:
-            raise ApiException("Request to server not successfull")
+            raise ApiException(GET_TO_SERVER_FAILED_ERROR)
         return res.json()
 
 class MusicsByNameService():
     #http://localhost:8000/api/v1/musics/byname?name=ciccio
     def fetch_musics_by_name_list(self,cd_name:Name):
-        res = requests.get(url=music_endpoint+"byname?name=" + cd_name.value)
+        try:
+            res = requests.get(url=music_endpoint+"byname?name=" + cd_name.value)
+        except:
+            raise ApiException(CONNECTION_ERROR)
         if res.status_code != 200:
-            raise ApiException("Request to server not successfull")
+            raise ApiException(GET_TO_SERVER_FAILED_ERROR)
         return res.json()
 
 @typechecked
@@ -196,12 +225,6 @@ class MusicLibrary:
     musics_by_published_by_service : MusicsByPublishedByService = field(default_factory=MusicsByPublishedByService,init=False)
     musics_by_cd_name_service : MusicsByNameService = field(default_factory=MusicsByNameService,init=False)
 
-
-    # def __init__(self):
-    #     self.musics_service = MusicsService()
-    #     self.musics_by_artists_service = MusicsByArtistService()
-    #     self.musics_by_published_by_service = MusicsByPublishedByService()
-    #     self.musics_by_cd_name_service = MusicsByNameService()
 
     def musics(self) -> 'List[Music]':
         return self.musics_service.fetch_musics_list()
