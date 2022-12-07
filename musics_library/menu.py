@@ -1,7 +1,7 @@
 from dataclasses import dataclass,field,InitVar
-
 from art import tprint
 
+from musics_library.services import ApiException
 from validation.regex import pattern
 from typing import Callable,List,Dict,Any,Optional
 from typeguard import typechecked
@@ -90,9 +90,12 @@ class Menu:
                     raise Exception
                 entry.on_selected()
                 return entry.is_exit
+            except(ApiException) as j:
+                print(j)
             except(Exception) as e:
-                 print(e)
-                 print("Invalid selection. Please, try again...")
+                print("Invalid selection. Please, try again...")
+
+
 
     def run(self)->None:
         while True:
