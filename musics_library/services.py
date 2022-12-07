@@ -1,5 +1,6 @@
 from dataclasses import dataclass,field
 from datetime import datetime
+from typing import List
 
 import requests
 from dateutil.parser import parser
@@ -123,7 +124,22 @@ class MusicsService:
                             json=dict)
         if res.status_code != 201:
             raise ApiException("CD creation failed") ## todo bisogna leggere gli errori esatti e stamparli nella tui
-        return True
+        i = res.json()
+        created_at = parser.parse(i['created_at'])
+        updated_at = parser.parse(i['updated_at'])
+        cd2 = Music( \
+            ID(i['id']), \
+            Name(i['name']), \
+            Artist(i['artist']), \
+            RecordCompany(i['record_company']), \
+            Genre(i['genre']), \
+            EANCode(i['ean_code']), \
+            Username(i['user']), \
+            Price.parse(i['price']), \
+            created_at, \
+            updated_at
+        )
+        return cd2
 
 
     def update_music(self,cd:Music,auth_user : AuthenticatedUser):
@@ -171,43 +187,44 @@ class MusicsByNameService():
         return res.json()
 
 @typechecked
+@dataclass(frozen=True)
 class MusicLibrary:
 
-    musics_service: MusicsService
-    musics_by_artists_service : MusicsByArtistService
-    musics_by_published_by_service : MusicsByPublishedByService
-    musics_by_cd_name_service : MusicsByNameService
+
+    musics_service: MusicsService = field(default_factory=MusicsService,init=False)
+    musics_by_artists_service : MusicsByArtistService = field(default_factory=MusicsByArtistService,init=False)
+    musics_by_published_by_service : MusicsByPublishedByService = field(default_factory=MusicsByPublishedByService,init=False)
+    musics_by_cd_name_service : MusicsByNameService = field(default_factory=MusicsByNameService,init=False)
 
 
-    def __init__(self):
-        self.musics_service = MusicsService()
-        self.musics_by_artists_service = MusicsByArtistService()
-        self.musics_by_published_by_service = MusicsByPublishedByService()
-        self.musics_by_cd_name_service = MusicsByNameService()
+    # def __init__(self):
+    #     self.musics_service = MusicsService()
+    #     self.musics_by_artists_service = MusicsByArtistService()
+    #     self.musics_by_published_by_service = MusicsByPublishedByService()
+    #     self.musics_by_cd_name_service = MusicsByNameService()
 
-    def musics(self):
+    def musics(self) -> 'List[Music]':
         return self.musics_service.fetch_musics_list()
 
-    def music(self,id:ID):
+    def music(self,id:ID) -> 'Music':
         return self.musics_service.fetch_music_detail(id)
 
-    def add_music(self,music:Music,auth_user:AuthenticatedUser):
+    def add_music(self,music:Music,auth_user:AuthenticatedUser) -> 'Music':
         return self.musics_service.add_music(music,auth_user)
 
-    def update_music(self,music:Music,auth_user:AuthenticatedUser):
+    def update_music(self,music:Music,auth_user:AuthenticatedUser) -> bool:
         return self.musics_service.update_music(music,auth_user)
 
-    def remove_music(self,id:ID,auth_user:AuthenticatedUser):
-        print("Before Cazz")
+    def remove_music(self,id:ID,auth_user:AuthenticatedUser) -> bool:
         return self.musics_service.remove_music(id,auth_user)
 
-    def musics_by_artist(self,artist:Artist):
+    def musics_by_artist(self,artist:Artist)->'List[Music]':
         return self.musics_by_artists_service.fetch_musics_by_artist_list(artist)
 
-    def musics_by_published_by(self,published_by:Username):
+    def musics_by_published_by(self,published_by:Username)->'List[Music]':
         return self.musics_by_published_by_service.fetch_musics_by_published_by_list(published_by)
 
-    def musics_by_cd_name(self,cd_name:Name):
+    def musics_by_cd_name(self,cd_name:Name)->'List[Music]':
         return self.musics_by_cd_name_service.fetch_musics_by_name_list(cd_name)
 
 
