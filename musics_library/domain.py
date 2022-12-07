@@ -24,7 +24,7 @@ class ID:
     def parse(value:str) -> 'ID':
         return ID(int(value))
     def __str__(self):
-        return self.value
+        return str(self.value)
 
 @typechecked
 @dataclass(frozen=True, order=True)
@@ -103,25 +103,13 @@ class EANCode:
         try:
             return bool(self.__validate(number))
         except ValidationError:
-            return False
+            raise ValidationError("Wrong EANCode format.")
 
     def __str__(self):
         return self.value
 
 
-@typechecked
-@dataclass(frozen=True, order=True)
-class Discount:
-    value_in_thousands: int
 
-    def __post_init__(self):
-        validate('value_in_thousands', self.value_in_thousands, min_value=0, max_value=1000)
-
-    def __str__(self):
-        return f'{self.value_in_thousands // 10}.{self.value_in_thousands % 10}%'
-
-    def apply(self, value: int):
-        return value * (1000 - self.value_in_thousands) // 1000
 
 
 @typechecked
@@ -165,26 +153,8 @@ class Price:
     def add(self, other: 'Price') -> 'Price':
         return Price(self.value_in_cents + other.value_in_cents, self.__create_key)
 
-    def apply_discount(self, discount: Discount) -> 'Price':
-        return Price(discount.apply(self.value_in_cents), self.__create_key)
 
 
-# TODO Published-by, Created-at, Updated-At
-
-@typechecked
-@dataclass(frozen=True, order=True)
-class Email:
-    value: str
-
-    def __post_init__(self):
-        validate('value', self.value, min_len=1, max_len=150,
-                 custom=pattern(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'))
-
-    def __str__(self):
-        return self.value
-
-
-# TODO created_at - updated_at CREIAMO GIORNI MESI ANNO come value objects oppure usiamo datetime()
 @typechecked
 @dataclass(frozen=True, order=True)
 class Username:
@@ -205,7 +175,7 @@ class Password:
     def __post_init__(self):
         schema = PasswordValidator()
         schema \
-            .min(3) \
+            .min(8) \
             .max(128) \
             .has().no().spaces() \
             .has().lowercase() \
@@ -235,7 +205,7 @@ class Music:
         pass
     def __str__(self):
         return self.name.value
-    #NAME,ARTIST,RECORD_COMPANY,GENRE,EAN_CODE,PRICE
+
     @property
     def music_id(self):
         return self.id
