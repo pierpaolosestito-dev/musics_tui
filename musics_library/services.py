@@ -41,7 +41,10 @@ CONNECTION_ERROR = "Check your network connection or retry later."
 LOGIN_ERROR = "Login not successfull"
 LOGOUT_ERROR = "Logout not successfull"
 GET_TO_SERVER_FAILED_ERROR = "The desired operation has failed. Try later"
-POST_PUT_DELETE_ERROR = GET_TO_SERVER_FAILED_ERROR + "or check your data"
+POST_ERROR = "MUSIC ADD FAILED"
+PUT_ERROR = "MUSIC UPDATE FAILED"
+DELETE_ERROR = "MUSIC DELETE FAILED"
+
 class AuthenticationService:
     #User
     def login(self,username:Username,password:Password):
@@ -112,7 +115,7 @@ class MusicsService:
             raise ApiException(GET_TO_SERVER_FAILED_ERROR)
 
         i = res.json()
-        print(i['name'])
+
         created_at = parser.parse(i['created_at'])
         updated_at = parser.parse(i['updated_at'])
         cd = Music( \
@@ -139,7 +142,7 @@ class MusicsService:
         except:
             raise ApiException(CONNECTION_ERROR)
         if res.status_code != 201:
-            raise ApiException(GET_TO_SERVER_FAILED_ERROR) ## todo bisogna leggere gli errori esatti e stamparli nella tui
+            raise ApiException(POST_ERROR) ## todo bisogna leggere gli errori esatti e stamparli nella tui
         i = res.json()
         created_at = parser.parse(i['created_at'])
         updated_at = parser.parse(i['updated_at'])
@@ -169,7 +172,7 @@ class MusicsService:
             raise ApiException(CONNECTION_ERROR)
 
         if res.status_code != 200:
-            raise ApiException(POST_PUT_DELETE_ERROR)
+            raise ApiException(PUT_ERROR)
         return True
 
     def remove_music(self,cd_id:ID,auth_user:AuthenticatedUser):
@@ -178,7 +181,7 @@ class MusicsService:
         except:
             raise ApiException(CONNECTION_ERROR)
         if res.status_code != 204:
-            raise ApiException(POST_PUT_DELETE_ERROR)
+            raise ApiException(DELETE_ERROR)
         return True
 
 
