@@ -6,6 +6,10 @@ from musics_library.domain import ID, Password, Name, Artist, RecordCompany, Gen
 import pytest
 
 #ID
+def test_parse_id_return_correct_id():
+    assert ID.parse("10")
+
+
 def test_negative_id_raises_exception():
     with pytest.raises(ValidationError):
         ID(-1)

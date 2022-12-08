@@ -16,7 +16,7 @@ class App:
         self.login_service = AuthenticationService()
         self.authenticated_user = None
         self.music_library = MusicLibrary()
-        self.menu = Menu.Builder(Description("Music Library"),auto_select=lambda:print())\
+        self.menu = Menu.Builder(Description("Music Library"),auto_select=lambda:self.__invite_to_register_to_anonymous_user())\
              \
             .with_entry(Entry.create('1', 'Add CD', on_selected=lambda: self.__add_music())) \
             .with_entry(Entry.create('2', 'Remove CD', on_selected=lambda: self.__remove_music())) \
@@ -33,9 +33,12 @@ class App:
         self.console = Console()
 
 
+    def __invite_to_register_to_anonymous_user(self):
+        if self.authenticated_user == None:
+            print("If you want to register an account into Music Library you can go here, {link}")
     def __print_welcome(self)->None:
-        print("Welcome")
-        print("If you want to register an account into Music Library you can go here, {link}")
+        print("*** Welcome to ***")
+
 
     def __add_music(self):
         music = Music(*self.__read_add_cd())
