@@ -1,6 +1,8 @@
+from datetime import datetime
+
 from valid8 import ValidationError
 
-from musics_library.domain import ID,Password, Name, Artist, RecordCompany, Genre, Username, EANCode, Price
+from musics_library.domain import ID, Password, Name, Artist, RecordCompany, Genre, Username, EANCode, Price, Music
 import pytest
 
 #ID
@@ -154,15 +156,6 @@ def test_username_only_accepts_characters_and_numbers():
     for correct in correct_values:
         assert Username(correct)
 
-#EMAIL
-
-
-
-
-
-
-
-
 #PASSWORD
 @pytest.mark.parametrize("wrong_passwords", [("A"), ("aa@"), ("Aa "), ("A-!@"), ("Aaaaa"),("Aaa aa"), ("Aaaaaaa")])
 def test_password_has_min_length_of_8(wrong_passwords):
@@ -177,3 +170,35 @@ def test_password_length_of_129_raises_exception():
 def test_password_with_spaces_raises_exception():
     with pytest.raises(ValueError):
         Password("A"*6+" "+"a")
+
+def test_music_with_id_and_created_at_and_updated_at_setted_with_default_values():
+    music = Music(Name("Ciao"), Artist("Bino"), RecordCompany("BinoRecord"), Genre("Rock"), EANCode("978020137962"), Price.create(10, 20))
+
+    assert music.music_id == 1898989
+
+    assert music.publishedby == "music-library"
+
+    assert music.created_at.day == datetime.now().day
+    assert music.created_at.month == datetime.now().month
+    assert music.created_at.year == datetime.now().year
+    assert music.created_at.time().hour == datetime.now().time().hour
+    assert music.created_at.time().minute == datetime.now().time().minute
+
+    assert music.updated_at.day == datetime.now().day
+    assert music.updated_at.month == datetime.now().month
+    assert music.updated_at.year == datetime.now().year
+    assert music.updated_at.time().hour == datetime.now().time().hour
+    assert music.updated_at.time().minute == datetime.now().time().minute
+
+def test_music_with_all_fields():
+    assert Music(ID(1),Name("Ciao"), Artist("Bino"), RecordCompany("BinoRecord"), Genre("Rock"), EANCode("978020137962"),Username("ssdsbm-test"), Price.create(10, 20),datetime.now(),datetime.now())
+
+
+def test_str_music():
+    music = Music(Name("Ciao"), Artist("Bino"), RecordCompany("BinoRecord"), Genre("Rock"), EANCode("978020137962"), Price.create(10, 20))
+    assert str(music) == "CD Name: Ciao Artist: Bino Record Company: BinoRecord Genre: Rock EANCode: 978020137962 Price: 10.20"
+
+def test_music_created_at():
+    assert Music(ID(1),Name("Ciao"), Artist("Bino"), RecordCompany("BinoRecord"), Genre("Rock"), EANCode("978020137962"),Username("ssdsbm-test"), Price.create(10, 20),datetime.now(),datetime.now()).createdat == datetime.now().strftime('%d-%m-%Y %H:%M')
+def test_music_updated_at():
+    assert Music(ID(1),Name("Ciao"), Artist("Bino"), RecordCompany("BinoRecord"), Genre("Rock"), EANCode("978020137962"),Username("ssdsbm-test"), Price.create(10, 20),datetime.now(),datetime.now()).updatedat == datetime.now().strftime('%d-%m-%Y %H:%M')

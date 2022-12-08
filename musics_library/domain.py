@@ -188,28 +188,38 @@ class Password:
 @typechecked
 @dataclass()
 class Music:
-    id: ID#Optional['ID'] = field(default=None,init=False)
+
     name: Name
     artist: Artist
     record_company: RecordCompany
     genre: Genre
     ean_code: EANCode
-    published_by: Username#Optional['Username'] = field(default=None,init=False)
     price: Price
-    created_at: datetime#Optional['datetime'] = field(default=None,init=False)
-    updated_at: datetime#Optional['datetime'] = field(default=None,init=False)
+    id: Optional['ID'] = field(default=ID(1898989))
+    published_by: Optional['Username'] = field(default=Username('music-library'))
+    created_at: Optional['datetime'] = field(default=datetime.now())
+    updated_at: Optional['datetime'] = field(default=datetime.now())
 
     #Music.create(...)
-    @staticmethod
-    def create():
-        pass
-    def __str__(self):
-        return self.name.value
 
+    def __str__(self):
+        return "CD Name: " + self.name.value + " Artist: " + self.artist.value + " Record Company: " + self.record_company.value + " Genre: " + self.genre.value + " EANCode: " + self.ean_code.value + " Price: " + str(self.price)
     @property
     def music_id(self):
-        return self.id
+        return self.id.value
 
+    @property
+    def publishedby(self):
+        return self.published_by.value
 
+    @property
+    def createdat(self): #TODO Test
+        return self.created_at.strftime('%d-%m-%Y %H:%M')
+
+    @property
+    def updatedat(self):#TODO Test
+        return self.updated_at.strftime('%d-%m-%Y %H:%M')
 #MusicLibrary in services.py o Music_Library in app.py
 
+music = Music(ID(1),Name("Ciao"), Artist("Bino"), RecordCompany("BinoRecord"), Genre("Rock"), EANCode("978020137962"),Username("ssdsbm-test"), Price.create(10, 20),datetime.now(),datetime.now())
+print(music.createdat)

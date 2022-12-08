@@ -1,12 +1,12 @@
 from datetime import datetime
 
 from musics_library.console import Console, MusicConsole
-from musics_library.domain import Username, Email, Password, Name, Artist, RecordCompany, Genre, EANCode, Price, Music, \
+from musics_library.domain import Username,Password, Name, Artist, RecordCompany, Genre, EANCode, Price, Music, \
     ID
 from musics_library.menu import Menu,Entry,Description
 from typing import Callable,Any
 
-from musics_library.services import AuthenticationService, AuthenticatedUser, MusicLibrary
+from musics_library.services import AuthenticationService,MusicLibrary
 
 from rich.console import Console
 from rich.prompt import Prompt,Confirm
@@ -47,6 +47,7 @@ class App:
 
     def __update_music(self):
         id = self.__read('ID',ID.parse)
+
         cd = self.music_library.music(id)
         self.__create_and_print_table_with_single_cd(cd)
         self.__read_for_update('Name',cd.name.value,Name)
@@ -64,18 +65,18 @@ class App:
             self.console.print("Record will not be deleted.")
 
     def __create_and_print_table_with_single_cd(self, cd):
-        table = Table()
+        table = Table(title="CD " + str(cd.id))
         columns = ['#', 'NAME', 'ARTIST', 'RECORD COMPANY', 'GENRE', 'EANCODE', 'PRICE', 'PUBLISHED BY',
                    'CREATED AT', 'UPDATED AT']
         for col in columns:
-            table.add_column(col)
-        table.add_row(str(cd.id.value), cd.name.value, cd.artist.value, cd.record_company.value, cd.genre.value,
-                      cd.ean_code.value, str(cd.price),
-                      cd.published_by.value, str(cd.created_at), str(cd.updated_at))
+            table.add_column(col,justify="center",style="cyan")
+
+        table.add_row(str(cd.id.value), cd.name.value,cd.artist.value,cd.record_company.value,cd.genre.value,cd.ean_code.value,str(cd.price),cd.published_by.value,cd.createdat,cd.updatedat)
+
         self.console.print(table)
 
     def __create_and_print_table_with_list_of_cd(self,musics):
-        table = Table()
+        table = Table(title="Musics")
         columns = ['#', 'NAME', 'ARTIST', 'RECORD COMPANY', 'GENRE', 'EANCODE', 'PRICE', 'PUBLISHED BY',
                    'CREATED AT', 'UPDATED AT']
         for col in columns:
@@ -85,7 +86,7 @@ class App:
         for cd in musics:
             table.add_row(str(cd.id.value), cd.name.value, cd.artist.value, cd.record_company.value, cd.genre.value,
                           cd.ean_code.value, str(cd.price),
-                          cd.published_by.value, str(cd.created_at), str(cd.updated_at))
+                          cd.published_by.value, cd.createdat,cd.updatedat)
         self.console.print(table)
 
     def __print_musics_by_artist(self):
@@ -166,7 +167,7 @@ class App:
         try:
             self.__run()
         except(Exception) as a:
-            print(a)
-            print('Panic error!')
+             print(a)
+             print('Panic error!')
 
 App().run()

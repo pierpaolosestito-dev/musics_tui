@@ -62,7 +62,7 @@ class MusicsService:
     #musicslibrary.domain import Music
     authenticated_user = AuthenticatedUser
 
-    def __to_dict(self, cd:Music):  # toDict attuale è stato creato per far funzionare la POST. #requests.put(url,json=cd.toDict()) NO ES POSIBLE. nella Delete invece, dobbiamo solo spostarci ID
+    def __to_dict(self, cd:Music):
             return {
                 "name": cd.name.value,
                 "artist": cd.artist.value,
@@ -84,18 +84,18 @@ class MusicsService:
         for i in res.json():
             created_at = parser.parse(i['created_at'])
             updated_at = parser.parse(i['updated_at'])
-            cd = Music(\
-                ID(i['id']),\
-                Name(i['name']),\
-                Artist(i['artist']),\
-                RecordCompany(i['record_company']),\
-                Genre(i['genre']),\
-                EANCode(i['ean_code']), \
-                Username(i['user']), \
-                Price.parse(i['price']),\
-                created_at,\
-                updated_at
-                )
+            cd = Music( \
+                id=ID(i['id']), \
+                name=Name(i['name']), \
+                artist=Artist(i['artist']), \
+                record_company=RecordCompany(i['record_company']), \
+                genre=Genre(i['genre']), \
+                ean_code=EANCode(i['ean_code']), \
+                published_by=Username(i['user']), \
+                price=Price.parse(i['price']), \
+                created_at=created_at, \
+                updated_at=updated_at
+            )
             cds.append(cd)
 
 
@@ -110,20 +110,22 @@ class MusicsService:
             raise ApiException(CONNECTION_ERROR)
         if res.status_code != 200:
             raise ApiException(GET_TO_SERVER_FAILED_ERROR)
+
         i = res.json()
+        print(i['name'])
         created_at = parser.parse(i['created_at'])
         updated_at = parser.parse(i['updated_at'])
         cd = Music( \
-            ID(i['id']), \
-            Name(i['name']), \
-            Artist(i['artist']), \
-            RecordCompany(i['record_company']), \
-            Genre(i['genre']), \
-            EANCode(i['ean_code']), \
-            Username(i['user']), \
-            Price.parse(i['price']), \
-            created_at, \
-            updated_at
+            id=ID(i['id']), \
+            name=Name(i['name']), \
+            artist=Artist(i['artist']), \
+            record_company=RecordCompany(i['record_company']), \
+            genre=Genre(i['genre']), \
+            ean_code=EANCode(i['ean_code']), \
+            published_by=Username(i['user']), \
+            price=Price.parse(i['price']), \
+            created_at=created_at, \
+            updated_at=updated_at
         )
         return cd
 
