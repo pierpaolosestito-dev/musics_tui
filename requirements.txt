@@ -8,3 +8,4 @@ art
 python-stdnum
 requests
 python-dateutil
+pwinput

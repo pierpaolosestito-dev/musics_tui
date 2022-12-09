@@ -1,4 +1,3 @@
-import json
 from datetime import datetime
 
 from password_validator import PasswordValidator
@@ -23,6 +22,7 @@ class ID:
     @staticmethod
     def parse(value:str) -> 'ID':
         return ID(int(value))
+
     def __str__(self):
         return str(self.value)
 

@@ -1,15 +1,11 @@
 from dataclasses import dataclass,field
-from datetime import datetime
 from typing import List
-
-import requests
-from dateutil.parser import parser
 from typeguard import typechecked
-
 from musics_library.domain import Username, Password, Music, EANCode, Genre, RecordCompany, Artist, Name, Price, ID
 from dotenv import load_dotenv
+import musics_library.mappers as mappers
 import os
-from dateutil import parser
+import requests
 
 load_dotenv()
 
@@ -48,17 +44,25 @@ DELETE_ERROR = "MUSIC DELETE FAILED"
 class AuthenticationService:
     #User
     def login(self,username:Username,password:Password):
-        res = requests.post(url=auth_endpoint+"login/",json={"username":username.value\
+        try:
+            res = requests.post(url=auth_endpoint+"login/",json={"username":username.value\
                                                                     ,"password":password.value})
+        except:
+            raise ApiException(CONNECTION_ERROR)
         if res.status_code != 200:
             raise ApiException(LOGIN_ERROR)
-        return AuthenticatedUser(res.json()["key"],ID(res.json()['user']['id']),Username(res.json()['user']['username']))
+        authenticated_user = mappers.AuthenticatedUserMapper.map_auth_user(res)
+        return authenticated_user
 
     def logout(self,auth_user : AuthenticatedUser):
-        res = requests.post(url=auth_endpoint+"logout/",headers={'Authorization': f'Token {auth_user.key}'})
+        try:
+            res = requests.post(url=auth_endpoint+"logout/",headers={'Authorization': f'Token {auth_user.key}'})
+        except:
+            raise ApiException(CONNECTION_ERROR)
         if res.status_code != 200:
             raise ApiException(LOGOUT_ERROR)
         return res.json()
+
 
 
 class MusicsService:
@@ -76,6 +80,7 @@ class MusicsService:
             }
 
 
+
     def fetch_musics_list(self):#Lista di Musics -> un Array, o un List della libreria typing #TODO MIGLIORARE return e gestione errori
         try:
             res = requests.get(url=music_endpoint)
@@ -85,20 +90,7 @@ class MusicsService:
             raise ApiException(GET_TO_SERVER_FAILED_ERROR)
         cds = []
         for i in res.json():
-            created_at = parser.parse(i['created_at'])
-            updated_at = parser.parse(i['updated_at'])
-            cd = Music( \
-                id=ID(i['id']), \
-                name=Name(i['name']), \
-                artist=Artist(i['artist']), \
-                record_company=RecordCompany(i['record_company']), \
-                genre=Genre(i['genre']), \
-                ean_code=EANCode(i['ean_code']), \
-                published_by=Username(i['user']), \
-                price=Price.parse(i['price']), \
-                created_at=created_at, \
-                updated_at=updated_at
-            )
+            cd = mappers.MusicMapper.map_cd(i)
             cds.append(cd)
 
 
@@ -115,21 +107,7 @@ class MusicsService:
             raise ApiException(GET_TO_SERVER_FAILED_ERROR)
 
         i = res.json()
-
-        created_at = parser.parse(i['created_at'])
-        updated_at = parser.parse(i['updated_at'])
-        cd = Music( \
-            id=ID(i['id']), \
-            name=Name(i['name']), \
-            artist=Artist(i['artist']), \
-            record_company=RecordCompany(i['record_company']), \
-            genre=Genre(i['genre']), \
-            ean_code=EANCode(i['ean_code']), \
-            published_by=Username(i['user']), \
-            price=Price.parse(i['price']), \
-            created_at=created_at, \
-            updated_at=updated_at
-        )
+        cd = mappers.MusicMapper.map_cd(i)
         return cd
 
     def add_music(self,cd:Music,auth_user: AuthenticatedUser):
@@ -143,30 +121,17 @@ class MusicsService:
             raise ApiException(CONNECTION_ERROR)
         if res.status_code != 201:
             raise ApiException(POST_ERROR) ## todo bisogna leggere gli errori esatti e stamparli nella tui
-        i = res.json()
-        created_at = parser.parse(i['created_at'])
-        updated_at = parser.parse(i['updated_at'])
-        cd2 = Music( \
-            ID(i['id']), \
-            Name(i['name']), \
-            Artist(i['artist']), \
-            RecordCompany(i['record_company']), \
-            Genre(i['genre']), \
-            EANCode(i['ean_code']), \
-            Username(i['user']), \
-            Price.parse(i['price']), \
-            created_at, \
-            updated_at
-        )
+        cd2 = mappers.MusicMapper.mappers.MusicMapper.map_cd(res.json())
         return cd2
 
 
     def update_music(self,cd:Music,auth_user : AuthenticatedUser):
         dict = self.__to_dict(cd)
         dict['id'] = cd.id.value
-        dict['published_by'] = auth_user.id
+        dict['published_by'] = auth_user.id.value
         try:
-            res = requests.put(url=music_endpoint+str(cd.id.value)+"/",headers={'Authorization':f'Token {auth_user.key}'},
+
+            res = requests.put(url=music_endpoint+str(cd.id)+"/",headers={'Authorization':f'Token {auth_user.key}'},
                            json=dict)
         except:
             raise ApiException(CONNECTION_ERROR)
@@ -194,20 +159,26 @@ class MusicsByArtistService():
             raise ApiException(CONNECTION_ERROR)
         if res.status_code != 200:
             raise ApiException(GET_TO_SERVER_FAILED_ERROR)
-        return res.json()
+        cds = []
+        for i in res.json():
+            cd = mappers.MusicMapper.map_cd(i)
+            cds.append(cd)
+        return cds
 
 class MusicsByPublishedByService():
     # http://localhost:8000/api/v1/musics/by_published_by?published_by=ciccio
     def fetch_musics_by_published_by_list(self,published_by:Username):
-
         try:
-            res = requests.get(url=music_endpoint+"by_published_by?published_by=" + published_by.value)
+            res = requests.get(url=music_endpoint+"by_published_by?publishedby=" + published_by.value)
         except:
             raise ApiException(CONNECTION_ERROR)
-
         if res.status_code != 200:
             raise ApiException(GET_TO_SERVER_FAILED_ERROR)
-        return res.json()
+        cds = []
+        for i in res.json():
+            cd = mappers.MusicMapper.map_cd(i)
+            cds.append(cd)
+        return cds
 
 class MusicsByNameService():
     #http://localhost:8000/api/v1/musics/byname?name=ciccio
@@ -218,7 +189,11 @@ class MusicsByNameService():
             raise ApiException(CONNECTION_ERROR)
         if res.status_code != 200:
             raise ApiException(GET_TO_SERVER_FAILED_ERROR)
-        return res.json()
+        cds = []
+        for i in res.json():
+            cd = mappers.MusicMapper.map_cd(i)
+            cds.append(cd)
+        return cds
 
 @typechecked
 @dataclass(frozen=True)
@@ -255,17 +230,4 @@ class MusicLibrary:
     def musics_by_cd_name(self,cd_name:Name)->'List[Music]':
         return self.musics_by_cd_name_service.fetch_musics_by_name_list(cd_name)
 
-
-
-# login_service = AuthenticationService()
-# try:
-#       authenticated_user = login_service.login(Username("ssdsbm"), Password("ssdsbm"))
-#       print(authenticated_user)
-#       music_service = MusicsService()
-#
-#       #cd = Music(Name("DaTUI"), Artist("Ciao"), RecordCompany("Ciao"), Genre("Ciao"), EANCode("978020137962"),Price.create(15, 50))
-#       print(music_service.remove_musica(ID(49),authenticated_user))
-#
-# except(ApiException) as e:
-#       print(e)
 

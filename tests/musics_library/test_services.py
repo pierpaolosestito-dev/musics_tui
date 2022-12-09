@@ -5,9 +5,11 @@ import dotenv
 import pytest
 import os
 
-from musics_library.domain import Username, ID, Price, EANCode, Genre, RecordCompany, Artist, Name, Music
+
+
+from musics_library.domain import Username, ID, Price, EANCode, Genre, RecordCompany, Artist, Name, Music, Password
 from musics_library.services import AuthenticatedUser, MusicsService, MusicsByPublishedByService, MusicsByArtistService, \
-    ApiException, MusicsByNameService
+    ApiException, MusicsByNameService, AuthenticationService
 
 
 @pytest.fixture
@@ -33,15 +35,26 @@ def test_str_authenticated_user():
 
 import requests
 
+def test_musics_service_fetch_musics_detail_wrong_url_raises_exception(requests_mock):
+    with pytest.raises(ApiException):
+        id = ID(49)
+        requests_mock.get("http://localhost:8000/api/v1/musics/"+str(id.value)+"/a",json="")
+        ms = MusicsService()
+        resp = ms.fetch_music_detail(id)
+
+
 def test_musics_service_fetch_musics_list(requests_mock):
     requests_mock.get("http://localhost:8000/api/v1/musics/",json="")
     ms = MusicsService()
     resp = ms.fetch_musics_list()
     assert resp != None
 
+
+
+
 def test_musics_service_by_publisher_fetch_musics_list(requests_mock):
     published_by = Username("ssdsbm")
-    requests_mock.get("http://localhost:8000/api/v1/musics/by_published_by?published_by="+published_by.value, json="")
+    requests_mock.get("http://localhost:8000/api/v1/musics/by_published_by?publishedby="+published_by.value, json="")
     ms = MusicsByPublishedByService()
     resp = ms.fetch_musics_by_published_by_list(published_by)
     assert resp != None
@@ -88,3 +101,60 @@ def test_musics_services_by_cd_name_wrong_url_raises_api_exception(requests_mock
                           json="")
         ms = MusicsByNameService()
         resp = ms.fetch_musics_by_name_list(cd_name)
+
+
+def test_authentication_service_correct_login(requests_mock):
+    requests_mock.post(url="http://localhost:8000/api/v1/auth/login/",
+                      json={"key":"abCde","user":{"id":1,"username":"ssdsbm"}})
+    auth_service = AuthenticationService()
+    resp = auth_service.login(Username("sssbm"),Password("ssdsbm1234"))
+    assert resp != None
+
+def test_authentication_service_correct_logout(requests_mock):
+    requests_mock.post(url="http://localhost:8000/api/v1/auth/logout/",
+                      json="Logout successfull")
+    auth_service = AuthenticationService()
+    resp = auth_service.logout(AuthenticatedUser("abCd",ID(1),Username("ssdsbm")))
+    assert resp != None
+
+def test_authentication_service_wrong_login_raises_exception(requests_mock):
+    requests_mock.post(url="http://localhost:8000/api/v1/auth/login/",
+                       json={}, status_code=400)
+    with pytest.raises(ApiException):
+        auth_service = AuthenticationService()
+        resp = auth_service.login(Username("sssbm"), Password("ssdsbm1234"))
+
+def test_authentication_service_wrong_logout_raises_exception(requests_mock):
+    requests_mock.post(url="http://localhost:8000/api/v1/auth/logout/",
+                       json={}, status_code=400)
+    with pytest.raises(ApiException):
+        auth_service = AuthenticationService()
+        resp = auth_service.logout(AuthenticatedUser("abCd", ID(1), Username("ssdsbm")))
+
+
+def test_musics_service_add_music_raises_exception(requests_mock):
+    with pytest.raises(ApiException):
+        requests_mock.post(url="http://localhost:8000/api/v1/musics/",
+                           json={
+                               "id": 41,
+                               "name": "Mod",
+                               "artist": "Ciao",
+                               "record_company": "Ciao",
+                               "genre": "Rock",
+                               "ean_code": "978020137962",
+                               "price": "15.00",
+                               "price_currency": "EUR",
+                               "published_by": 1,
+                               "user": "ssdsbm",
+                               "created_at": "2022-12-04T17:27:28.325209Z",
+                               "updated_at": "2022-12-09T14:13:02.610624Z"
+                           }, )
+        ms = MusicsService()
+        resp = ms.add_music(Music(id=ID(1), name=Name("Mod"), artist=Artist("Ciao"), record_company=RecordCompany("Ciao"),
+                              genre=Genre("Rock"), ean_code=EANCode("978020137962"), price=Price.parse("15.00")),
+                        auth_user=AuthenticatedUser("kkbb", ID(1), Username("ciao")))
+
+
+def test_music_services_to_dict_music():
+    ms = MusicsService()
+    assert ms._MusicsService__to_dict(Music(name=Name("Ciao"),artist=Artist("Ciao"),record_company=RecordCompany("Ciao"),genre=Genre("Rock"),ean_code=EANCode("978020137962"),price=Price.create(10,0))) == {"name":"Ciao","artist":"Ciao","record_company":"Ciao","genre":"Rock","ean_code":"978020137962","price":"10.00"}

@@ -60,9 +60,6 @@ class Menu:
     def __post_init__(self, create_key: Any):
         validate('create_key',create_key,custom=Menu.Builder.is_valid_key)
 
-
-
-
     def _add_entry(self,value:Entry,create_key:Any)->None:
         validate('create_key',create_key,custom=Menu.Builder.is_valid_key)
         validate('value.key',value.key,custom=lambda v : v not in self.__key2entry)
@@ -91,9 +88,14 @@ class Menu:
                 entry.on_selected()
                 return entry.is_exit
             except(ApiException) as j:
-                print(j)
+                  print(j)
+
+            except(TypeError) as k:
+                  print("You must be logged or you must be the publisher of that record")
+
             except(Exception) as e:
-                print("Invalid selection. Please, try again...")
+                  print(e)
+                  print("Invalid selection. Please, try again...")
 
 
 
