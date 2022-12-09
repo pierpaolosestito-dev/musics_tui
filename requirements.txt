@@ -5,3 +5,6 @@ typeguard
 rich
 python-dotenv
 art
+python-stdnum
+requests
+python-dateutil
