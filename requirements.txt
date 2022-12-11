@@ -9,3 +9,4 @@ python-stdnum
 requests
 python-dateutil
 pwinput
+requests_mock
