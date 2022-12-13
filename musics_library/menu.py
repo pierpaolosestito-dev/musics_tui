@@ -5,6 +5,8 @@ from art import tprint
 from typeguard import typechecked
 from valid8 import validate
 
+
+from musics_library.exceptions import AppException
 from musics_library.services import ApiException
 from validation.regex import pattern
 
@@ -89,10 +91,9 @@ class Menu:
                 return entry.is_exit
             except ApiException as j:
                 print(j)
-            except TypeError:
-                print("You must be logged or you must be the publisher of that record")
+            except AppException as k:
+                 print(k)
             except Exception as e:
-                print(e)
                 print("Invalid selection. Please, try again...")
 
     def run(self) -> None:

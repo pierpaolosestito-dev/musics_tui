@@ -11,9 +11,6 @@ from musics_library.menu import Menu, Entry, Description
 from musics_library.services import AuthenticationService, MusicLibrary
 
 
-class AppException(Exception):
-    pass
-
 
 class App:
     def __init__(self):
@@ -24,7 +21,6 @@ class App:
         self.console = Console()
 
     def __create_menu(self):
-        print("Chiamato")
         menu_builder = Menu.Builder(
             Description("Music Library"), auto_select=lambda: self.__invite_to_register_to_anonymous_user()) \
             .with_entry(
@@ -61,6 +57,8 @@ class App:
         self.console.print("*** Welcome to ***")
 
     def __add_music(self):
+        if self.authenticated_user == None:
+            raise AppException("You must be logged.")
         music = Music(*self.__read_cd_for_add())
         y_or_n = Confirm.ask("Are you sure?")
         if y_or_n:
@@ -69,6 +67,8 @@ class App:
             self.console.print("Music not added")
 
     def __update_music(self):
+        if self.authenticated_user == None:
+            raise AppException("You must be logged.")
         cd_id = self.__read('ID', ID.parse)
         cd = self.music_library.music(cd_id)
         self.__create_and_print_table_with_single_cd(cd)
@@ -83,6 +83,8 @@ class App:
             self.console.print("Record will not be updated.")
 
     def __remove_music(self):
+        if self.authenticated_user == None:
+            raise AppException("You must be logged.")
         cd_id = self.__read('ID', ID.parse)
         cd = self.music_library.music(cd_id)
 
