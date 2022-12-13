@@ -1,5 +1,5 @@
-from datetime import datetime
 
+from art import tprint
 import pwinput
 from musics_library.domain import Username,Password, Name, Artist, RecordCompany, Genre, EANCode, Price, Music, \
     ID
@@ -11,7 +11,11 @@ from musics_library.services import AuthenticationService,MusicLibrary
 from rich.console import Console
 from rich.prompt import Prompt,Confirm
 from rich.table import Table
-
+from dotenv import load_dotenv
+import os
+load_dotenv()
+link = os.getenv('MUSIC_WEBSITE')
+READ_ERROR = "Error"
 class AppException(Exception):
     pass
 class App:
@@ -23,7 +27,6 @@ class App:
         self.console = Console()
 
     def __create_menu(self):
-        print("Chiamato")
         menu_builder = Menu.Builder(Description("Music Library"),auto_select=lambda:self.__invite_to_register_to_anonymous_user())\
             .with_entry(Entry.create('1', 'Add CD', on_selected=lambda: self.__add_music())) \
             .with_entry(Entry.create('2', 'Remove CD', on_selected=lambda: self.__remove_music())) \
@@ -40,11 +43,13 @@ class App:
         return menu_builder.build()
     def __invite_to_register_to_anonymous_user(self):
         if self.authenticated_user == None:
-            self.console.print("If you want to register an account into Music Library you can go here, {link}")
+            self.console.print(f"If you want to register an account into Music Library you can go here, {link}")
     def __print_welcome(self)->None:
         self.console.print("*** Welcome to ***")
-
+        tprint("Music Library")
     def __add_music(self):
+        if self.authenticated_user == None:
+            raise AppException("You must be logged")
         music = Music(*self.__read_cd_for_add())
         y_or_n = Confirm.ask("Are you sure?")
         if y_or_n:
@@ -53,6 +58,8 @@ class App:
             self.console.print("Music not added")
 
     def __update_music(self):
+        if self.authenticated_user == None:
+            raise AppException("You must be logged.")
         id = self.__read('ID',ID.parse)
         cd = self.music_library.music(id)
         self.__create_and_print_table_with_single_cd(cd)
@@ -67,6 +74,8 @@ class App:
 
 
     def __remove_music(self):
+        if self.authenticated_user == None:
+            raise AppException("You must be logged")
         id = self.__read('ID', ID.parse)
         cd = self.music_library.music(id)
 
@@ -74,7 +83,7 @@ class App:
 
         y_or_n = Confirm.ask("Are you sure that you want delete this record?")
         if y_or_n:
-            self.music_library.remove_music(id,self.authenticated_user)
+                self.music_library.remove_music(id,self.authenticated_user)
         else:
             self.console.print("Record will not be deleted.")
 
@@ -173,7 +182,7 @@ class App:
                 res = builder(line.strip())
                 return res
             except:
-                print("Error")
+                print(READ_ERROR)
 
     @staticmethod
     def __read_password(builder):
@@ -183,7 +192,7 @@ class App:
                 res = builder(line.strip())
                 return res
             except:
-                print("Error")
+                print(READ_ERROR)
 
 
     @staticmethod
@@ -194,13 +203,13 @@ class App:
                 res = builder(line.strip())
                 return res
             except:
-                print("Error")
+                raise AppException("Error")
 
     def __run(self)->None:
         try:
             self.__print_welcome()
         except:
-            print('Continuing with an empty list of vehicles...')
+            raise AppException("Error")
         self.menu.run()
 
     def run(self)->None:

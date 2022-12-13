@@ -1,5 +1,6 @@
 from dataclasses import dataclass,field,InitVar
-from art import tprint
+import musics_library.app as app
+
 
 from musics_library.services import ApiException
 from validation.regex import pattern
@@ -71,7 +72,7 @@ class Menu:
         return bool(list(filter(lambda e: e.is_exit, self.__entries)))
 
     def __print(self)->None:
-        tprint(self.description.value)
+        #print(self.description.value)
         self.auto_select()
         for entry in self.__entries:
             if not entry.is_hidden:
@@ -90,11 +91,10 @@ class Menu:
             except(ApiException) as j:
                   print(j)
 
-            except(TypeError) as k:
-                  print("You must be logged or you must be the publisher of that record")
+            except(app.AppException) as k:
+                   print(k)
 
             except(Exception) as e:
-                  print(e)
                   print("Invalid selection. Please, try again...")
 
 
