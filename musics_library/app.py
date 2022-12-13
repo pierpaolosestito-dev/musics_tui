@@ -118,7 +118,7 @@ class App:
         columns = ['#', 'NAME', 'ARTIST', 'RECORD COMPANY', 'GENRE', 'EANCODE', 'PRICE', 'PUBLISHED BY',
                    'CREATED AT', 'UPDATED AT']
         for col in columns:
-            table.add_column(col)
+            table.add_column(col, justify="center", style="cyan")
 
         for cd in musics:
             table.add_row(str(cd.id.value), cd.name.value, cd.artist.value, cd.record_company.value, cd.genre.value,
