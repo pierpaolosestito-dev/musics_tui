@@ -184,7 +184,7 @@ class Password:
 
 @typechecked
 @dataclass()
-class Music:
+class CD:
     name: Name
     artist: Artist
     record_company: RecordCompany
@@ -211,16 +211,11 @@ class Music:
         return self.published_by.value
 
     @property
-    def createdat(self):  # TODO Test
+    def createdat(self):
         return self.created_at.strftime('%d-%m-%Y %H:%M')
 
     @property
-    def updatedat(self):  # TODO Test
+    def updatedat(self):
         return self.updated_at.strftime('%d-%m-%Y %H:%M')
 
 
-# MusicLibrary in services.py o Music_Library in app.py
-
-music = Music(ID(1), Name("Ciao"), Artist("Bino"), RecordCompany("BinoRecord"), Genre("Rock"), EANCode("978020137962"),
-              Username("ssdsbm-test"), Price.create(10, 20), datetime.now(), datetime.now())
-print(music.createdat)

@@ -5,18 +5,23 @@ from rich.console import Console
 from rich.prompt import Prompt, Confirm
 from rich.table import Table
 
-from musics_library.domain import Username, Password, Name, Artist, RecordCompany, Genre, EANCode, Price, Music, \
+from musics_library.domain import Username, Password, Name, Artist, RecordCompany, Genre, EANCode, Price, CD, \
     ID
+from musics_library.exceptions import AppException
 from musics_library.menu import Menu, Entry, Description
-from musics_library.services import AuthenticationService, MusicLibrary
+from musics_library.services import AuthenticationService, CDLibrary
+from dotenv import load_dotenv
+import os
+load_dotenv()
 
+music_website= os.getenv('MUSIC_WEBSITE')
 
 
 class App:
     def __init__(self):
         self.login_service = AuthenticationService()
         self.authenticated_user = None
-        self.music_library = MusicLibrary()
+        self.music_library = CDLibrary()
         self.menu = self.__create_menu()
         self.console = Console()
 
@@ -51,7 +56,7 @@ class App:
 
     def __invite_to_register_to_anonymous_user(self):
         if self.authenticated_user is None:
-            self.console.print("If you want to register an account into Music Library you can go here, {link}")
+            self.console.print(f"If you want to register an account into Music Library you can go here, {music_website}")
 
     def __print_welcome(self) -> None:
         self.console.print("*** Welcome to ***")
@@ -59,7 +64,7 @@ class App:
     def __add_music(self):
         if self.authenticated_user == None:
             raise AppException("You must be logged.")
-        music = Music(*self.__read_cd_for_add())
+        music = CD(*self.__read_cd_for_add())
         y_or_n = Confirm.ask("Are you sure?")
         if y_or_n:
             self.music_library.add_music(music, self.authenticated_user)
@@ -76,8 +81,8 @@ class App:
         cd_fields = self.__read_cd_for_update(cd)
         y_or_n = Confirm.ask("Are you sure?")
         if y_or_n:
-            music = Music(id=cd_id, name=cd_fields[0], artist=cd_fields[1], record_company=cd_fields[2],
-                          genre=cd_fields[3], ean_code=cd_fields[4], price=cd_fields[5])
+            music = CD(id=cd_id, name=cd_fields[0], artist=cd_fields[1], record_company=cd_fields[2],
+                       genre=cd_fields[3], ean_code=cd_fields[4], price=cd_fields[5])
             self.music_library.update_music(music, self.authenticated_user)
         else:
             self.console.print("Record will not be updated.")
@@ -140,7 +145,7 @@ class App:
         musics = self.music_library.musics()
         self.__create_and_print_table_with_list_of_cd(musics)
 
-    def __read_cd_for_update(self, cd: Music):
+    def __read_cd_for_update(self, cd: CD):
         name = self.__read_for_update("Name", cd.name.value, Name)
         artist = self.__read_for_update("Artist", cd.artist.value, Artist)
         record_company = self.__read_for_update("Record Company", cd.record_company.value, RecordCompany)
@@ -214,7 +219,7 @@ class App:
         try:
             self.__print_welcome()
         except:
-            print('Continuing with an empty list of vehicles...')
+            print('App Error')
         self.menu.run()
 
     def run(self) -> None:

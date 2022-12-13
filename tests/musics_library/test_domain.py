@@ -2,14 +2,13 @@ from datetime import datetime
 
 from valid8 import ValidationError
 
-from musics_library.domain import ID, Password, Name, Artist, RecordCompany, Genre, Username, EANCode, Price, Music
+from musics_library.domain import ID, Password, Name, Artist, RecordCompany, Genre, Username, EANCode, Price, CD
 import pytest
 
 
 # ID
 def test_parse_id_return_correct_id():
     assert ID.parse("10")
-
 
 def test_negative_id_raises_exception():
     with pytest.raises(ValidationError):
@@ -219,46 +218,46 @@ def test_password_with_spaces_raises_exception():
         Password("A" * 6 + " " + "a")
 
 
-def test_music_with_id_and_created_at_and_updated_at_setted_with_default_values():
-    music = Music(Name("Ciao"), Artist("Bino"), RecordCompany("BinoRecord"), Genre("Rock"), EANCode("978020137962"),
-                  Price.create(10, 20))
+def test_cd_with_id_and_created_at_and_updated_at_setted_with_default_values():
+    cd = CD(Name("Ciao"), Artist("Bino"), RecordCompany("BinoRecord"), Genre("Rock"), EANCode("978020137962"),
+               Price.create(10, 20))
 
-    assert music.music_id == 1898989
+    assert cd.music_id == 1898989
 
-    assert music.publishedby == "music-library"
+    assert cd.publishedby == "music-library"
 
-    assert music.created_at.day == datetime.now().day
-    assert music.created_at.month == datetime.now().month
-    assert music.created_at.year == datetime.now().year
-    assert music.created_at.time().hour == datetime.now().time().hour
-    assert music.created_at.time().minute == datetime.now().time().minute
+    assert cd.created_at.day == datetime.now().day
+    assert cd.created_at.month == datetime.now().month
+    assert cd.created_at.year == datetime.now().year
+    assert cd.created_at.time().hour == datetime.now().time().hour
+    assert cd.created_at.time().minute == datetime.now().time().minute
 
-    assert music.updated_at.day == datetime.now().day
-    assert music.updated_at.month == datetime.now().month
-    assert music.updated_at.year == datetime.now().year
-    assert music.updated_at.time().hour == datetime.now().time().hour
-    assert music.updated_at.time().minute == datetime.now().time().minute
-
-
-def test_music_with_all_fields():
-    assert Music(ID(1), Name("Ciao"), Artist("Bino"), RecordCompany("BinoRecord"), Genre("Rock"),
-                 EANCode("978020137962"), Username("ssdsbm-test"), Price.create(10, 20), datetime.now(), datetime.now())
+    assert cd.updated_at.day == datetime.now().day
+    assert cd.updated_at.month == datetime.now().month
+    assert cd.updated_at.year == datetime.now().year
+    assert cd.updated_at.time().hour == datetime.now().time().hour
+    assert cd.updated_at.time().minute == datetime.now().time().minute
 
 
-def test_str_music():
-    music = Music(Name("Ciao"), Artist("Bino"), RecordCompany("BinoRecord"), Genre("Rock"), EANCode("978020137962"),
-                  Price.create(10, 20))
+def test_cd_with_all_fields():
+    assert CD(ID(1), Name("Ciao"), Artist("Bino"), RecordCompany("BinoRecord"), Genre("Rock"),
+              EANCode("978020137962"), Username("ssdsbm-test"), Price.create(10, 20), datetime.now(), datetime.now())
+
+
+def test_str_cd():
+    music = CD(Name("Ciao"), Artist("Bino"), RecordCompany("BinoRecord"), Genre("Rock"), EANCode("978020137962"),
+               Price.create(10, 20))
     assert str(
         music) == "CD Name: Ciao Artist: Bino Record Company: BinoRecord Genre: Rock EANCode: 978020137962 Price: 10.20"
 
 
-def test_music_created_at():
-    assert Music(ID(1), Name("Ciao"), Artist("Bino"), RecordCompany("BinoRecord"), Genre("Rock"),
-                 EANCode("978020137962"), Username("ssdsbm-test"), Price.create(10, 20), datetime.now(),
-                 datetime.now()).createdat == datetime.now().strftime('%d-%m-%Y %H:%M')
+def test_cd_created_at():
+    assert CD(ID(1), Name("Ciao"), Artist("Bino"), RecordCompany("BinoRecord"), Genre("Rock"),
+              EANCode("978020137962"), Username("ssdsbm-test"), Price.create(10, 20), datetime.now(),
+              datetime.now()).createdat == datetime.now().strftime('%d-%m-%Y %H:%M')
 
 
-def test_music_updated_at():
-    assert Music(ID(1), Name("Ciao"), Artist("Bino"), RecordCompany("BinoRecord"), Genre("Rock"),
-                 EANCode("978020137962"), Username("ssdsbm-test"), Price.create(10, 20), datetime.now(),
-                 datetime.now()).updatedat == datetime.now().strftime('%d-%m-%Y %H:%M')
+def test_cd_updated_at():
+    assert CD(ID(1), Name("Ciao"), Artist("Bino"), RecordCompany("BinoRecord"), Genre("Rock"),
+              EANCode("978020137962"), Username("ssdsbm-test"), Price.create(10, 20), datetime.now(),
+              datetime.now()).updatedat == datetime.now().strftime('%d-%m-%Y %H:%M')

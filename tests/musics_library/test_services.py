@@ -3,9 +3,9 @@ import os
 import dotenv
 import pytest
 
-from musics_library.domain import Username, ID, Price, EANCode, Genre, RecordCompany, Artist, Name, Music, Password
-from musics_library.services import AuthenticatedUser, MusicsService, MusicsByPublishedByService, MusicsByArtistService, \
-    ApiException, MusicsByNameService, AuthenticationService
+from musics_library.domain import Username, ID, Price, EANCode, Genre, RecordCompany, Artist, Name, CD, Password
+from musics_library.services import AuthenticatedUser, CDService, CDByPublishedByService, CDByArtistService, \
+    ApiException, CDByNameService, AuthenticationService
 
 
 @pytest.fixture
@@ -37,30 +37,30 @@ def test_musics_service_fetch_musics_detail_wrong_url_raises_exception(requests_
     with pytest.raises(ApiException):
         id = ID(49)
         requests_mock.get("http://localhost:8000/api/v1/musics/" + str(id.value) + "/a", json="")
-        ms = MusicsService()
-        resp = ms.fetch_music_detail(id)
+        ms = CDService()
+        resp = ms.fetch_cd_detail(id)
 
 
 def test_musics_service_fetch_musics_list(requests_mock):
     requests_mock.get("http://localhost:8000/api/v1/musics/", json="")
-    ms = MusicsService()
-    resp = ms.fetch_musics_list()
+    ms = CDService()
+    resp = ms.fetch_cd_list()
     assert resp != None
 
 
 def test_musics_service_by_publisher_fetch_musics_list(requests_mock):
     published_by = Username("ssdsbm")
     requests_mock.get("http://localhost:8000/api/v1/musics/by_published_by?publishedby=" + published_by.value, json="")
-    ms = MusicsByPublishedByService()
-    resp = ms.fetch_musics_by_published_by_list(published_by)
+    ms = CDByPublishedByService()
+    resp = ms.fetch_cd_by_published_by_list(published_by)
     assert resp != None
 
 
 def test_musics_service_by_artist_fetch_musics_list(requests_mock):
     artist = Artist("ssdsbm")
     requests_mock.get("http://localhost:8000/api/v1/musics/byartist?artist=" + artist.value, json="")
-    ms = MusicsByArtistService()
-    resp = ms.fetch_musics_by_artist_list(artist)
+    ms = CDByArtistService()
+    resp = ms.fetch_cd_by_artist_list(artist)
     assert resp != None
 
 
@@ -68,7 +68,7 @@ def test_musics_service_by_cd_name_fetch_musics_list(requests_mock):
     cd_name = Name("ssdsbm")
     requests_mock.get("http://localhost:8000/api/v1/musics/byname?name=" + cd_name.value,
                       json="")
-    ms = MusicsByNameService()
+    ms = CDByNameService()
     resp = ms.fetch_musics_by_name_list(cd_name)
     assert resp != None
 
@@ -76,16 +76,16 @@ def test_musics_service_by_cd_name_fetch_musics_list(requests_mock):
 def test_musics_services_wrong_url_raises_api_exception(requests_mock):
     with pytest.raises(ApiException):
         requests_mock.get("http://localhost:8000/api/v1/musics/wrong_path", json="")
-        ms = MusicsService()
-        resp = ms.fetch_musics_list()
+        ms = CDService()
+        resp = ms.fetch_cd_list()
 
 
 def test_musics_services_by_artist_wrong_url_raises_api_exception(requests_mock):
     with pytest.raises(ApiException):
         artist = Artist("ssdsbm")
         requests_mock.get("http://localhost:8000/api/v1/musics/byarattist?artist=" + artist.value, json="")
-        ms = MusicsByArtistService()
-        resp = ms.fetch_musics_by_artist_list(artist)
+        ms = CDByArtistService()
+        resp = ms.fetch_cd_by_artist_list(artist)
 
 
 def test_musics_services_by_published_by_wrong_url_raises_api_exception(requests_mock):
@@ -93,8 +93,8 @@ def test_musics_services_by_published_by_wrong_url_raises_api_exception(requests
         published_by = Username("ssdsbm")
         requests_mock.get("http://localhost:8000/api/v1/musics/by_published_byyyy?published_by=" + published_by.value,
                           json="")
-        ms = MusicsByPublishedByService()
-        resp = ms.fetch_musics_by_published_by_list(published_by)
+        ms = CDByPublishedByService()
+        resp = ms.fetch_cd_by_published_by_list(published_by)
 
 
 def test_musics_services_by_cd_name_wrong_url_raises_api_exception(requests_mock):
@@ -102,7 +102,7 @@ def test_musics_services_by_cd_name_wrong_url_raises_api_exception(requests_mock
         cd_name = Name("ssdsbm")
         requests_mock.get("http://localhost:8000/api/v1/musics/bynamee?published_by=" + cd_name.value,
                           json="")
-        ms = MusicsByNameService()
+        ms = CDByNameService()
         resp = ms.fetch_musics_by_name_list(cd_name)
 
 
@@ -155,19 +155,10 @@ def test_musics_service_add_music_raises_exception(requests_mock):
                                "created_at": "2022-12-04T17:27:28.325209Z",
                                "updated_at": "2022-12-09T14:13:02.610624Z"
                            }, )
-        ms = MusicsService()
-        resp = ms.add_music(
-            Music(id=ID(1), name=Name("Mod"), artist=Artist("Ciao"), record_company=RecordCompany("Ciao"),
-                  genre=Genre("Rock"), ean_code=EANCode("978020137962"), price=Price.parse("15.00")),
+        ms = CDService()
+        resp = ms.add_cd(
+            CD(id=ID(1), name=Name("Mod"), artist=Artist("Ciao"), record_company=RecordCompany("Ciao"),
+               genre=Genre("Rock"), ean_code=EANCode("978020137962"), price=Price.parse("15.00")),
             auth_user=AuthenticatedUser("kkbb", ID(1), Username("ciao")))
 
 
-def test_music_services_to_dict_music():
-    ms = MusicsService()
-    assert ms._MusicsService__to_dict(
-        Music(name=Name("Ciao"), artist=Artist("Ciao"), record_company=RecordCompany("Ciao"), genre=Genre("Rock"),
-              ean_code=EANCode("978020137962"), price=Price.create(10, 0))) == {"name": "Ciao", "artist": "Ciao",
-                                                                                "record_company": "Ciao",
-                                                                                "genre": "Rock",
-                                                                                "ean_code": "978020137962",
-                                                                                "price": "10.00"}

@@ -1,14 +1,14 @@
-from musics_library.domain import Music, ID, Name, Artist, RecordCompany, Genre, EANCode, Username, Price
+from musics_library.domain import CD, ID, Name, Artist, RecordCompany, Genre, EANCode, Username, Price
 from dateutil import parser
 import musics_library.services as services
 
 
-class MusicMapper:
+class CDMapper:
     @staticmethod
     def map_cd(res):
         created_at = parser.parse(res['created_at'])
         updated_at = parser.parse(res['updated_at'])
-        cd = Music(
+        cd = CD(
             id=ID(res['id']),
             name=Name(res['name']),
             artist=Artist(res['artist']),
