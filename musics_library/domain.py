@@ -1,30 +1,31 @@
+import re
+from dataclasses import dataclass, InitVar, field
 from datetime import datetime
+from typing import Any, Optional
 
 from password_validator import PasswordValidator
+from stdnum.util import clean, isdigits
 from typeguard import typechecked
-from typing import Any, List,Optional
-from dataclasses import dataclass, InitVar, field
 from valid8 import validate, ValidationError
 
-
 from validation.regex import pattern
-import re
-from stdnum.util import clean, isdigits
+
 
 @typechecked
-@dataclass(frozen=True,order=True)
+@dataclass(frozen=True, order=True)
 class ID:
     value: int
 
     def __post_init__(self):
-        validate('value',self.value,min_value=0)
+        validate('value', self.value, min_value=0)
 
     @staticmethod
-    def parse(value:str) -> 'ID':
+    def parse(value: str) -> 'ID':
         return ID(int(value))
 
     def __str__(self):
         return str(self.value)
+
 
 @typechecked
 @dataclass(frozen=True, order=True)
@@ -109,9 +110,6 @@ class EANCode:
         return self.value
 
 
-
-
-
 @typechecked
 @dataclass(frozen=True, order=True)
 class Price:
@@ -154,7 +152,6 @@ class Price:
         return Price(self.value_in_cents + other.value_in_cents, self.__create_key)
 
 
-
 @typechecked
 @dataclass(frozen=True, order=True)
 class Username:
@@ -188,7 +185,6 @@ class Password:
 @typechecked
 @dataclass()
 class Music:
-
     name: Name
     artist: Artist
     record_company: RecordCompany
@@ -200,10 +196,12 @@ class Music:
     created_at: Optional['datetime'] = field(default=datetime.now())
     updated_at: Optional['datetime'] = field(default=datetime.now())
 
-    #Music.create(...)
+    # Music.create(...)
 
     def __str__(self):
-        return "CD Name: " + self.name.value + " Artist: " + self.artist.value + " Record Company: " + self.record_company.value + " Genre: " + self.genre.value + " EANCode: " + self.ean_code.value + " Price: " + str(self.price)
+        return "CD Name: " + self.name.value + " Artist: " + self.artist.value + " Record Company: " + self.record_company.value + " Genre: " + self.genre.value + " EANCode: " + self.ean_code.value + " Price: " + str(
+            self.price)
+
     @property
     def music_id(self):
         return self.id.value
@@ -213,13 +211,16 @@ class Music:
         return self.published_by.value
 
     @property
-    def createdat(self): #TODO Test
+    def createdat(self):  # TODO Test
         return self.created_at.strftime('%d-%m-%Y %H:%M')
 
     @property
-    def updatedat(self):#TODO Test
+    def updatedat(self):  # TODO Test
         return self.updated_at.strftime('%d-%m-%Y %H:%M')
-#MusicLibrary in services.py o Music_Library in app.py
 
-music = Music(ID(1),Name("Ciao"), Artist("Bino"), RecordCompany("BinoRecord"), Genre("Rock"), EANCode("978020137962"),Username("ssdsbm-test"), Price.create(10, 20),datetime.now(),datetime.now())
+
+# MusicLibrary in services.py o Music_Library in app.py
+
+music = Music(ID(1), Name("Ciao"), Artist("Bino"), RecordCompany("BinoRecord"), Genre("Rock"), EANCode("978020137962"),
+              Username("ssdsbm-test"), Price.create(10, 20), datetime.now(), datetime.now())
 print(music.createdat)
