@@ -19,13 +19,13 @@ def test_dotenv(load_dotenv):
     assert os.getenv('AUTH_ENDPOINT') == "http://localhost:8000/api/v1/auth/"
 
 
-def test_authenticated_user_is_singleton():
-    a = AuthenticatedUser('eyJhbGciOiJIUzI1NiIsInR5c', ID(1), Username("ssdsbm28"))
-    b = AuthenticatedUser()
-    assert id(a) == id(b)
-    assert a.key == b.key
-    assert a.id == b.id
-    assert a.username == b.username
+# def test_authenticated_user_is_singleton():
+#     a = AuthenticatedUser('eyJhbGciOiJIUzI1NiIsInR5c', ID(1), Username("ssdsbm28"))
+#     b = AuthenticatedUser()
+#     assert id(a) == id(b)
+#     assert a.key == b.key
+#     assert a.id == b.id
+#     assert a.username == b.username
 
 
 def test_str_authenticated_user():

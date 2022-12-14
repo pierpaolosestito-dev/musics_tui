@@ -16,24 +16,18 @@ music_endpoint = os.getenv('MUSIC_ENDPOINT')
 auth_endpoint = os.getenv('AUTH_ENDPOINT')
 
 
-class SingletonMeta(type):
-    _instances = {}
-
-    def __call__(cls, *args, **kwargs):
-        if cls not in cls._instances:
-            instance = super().__call__(*args, **kwargs)
-            cls._instances[cls] = instance
-        return cls._instances[cls]
 
 
-class AuthenticatedUser(metaclass=SingletonMeta):
-    def __init__(self, key: str, id: ID, username: Username):
+
+class AuthenticatedUser():
+    def __init__(self, key: str, id: ID, username: Username,is_superuser: bool,is_publisher: bool):
         self.key = key
         self.id = id
         self.username = username
+        self.is_authorized = is_superuser or is_publisher
 
     def __str__(self):
-        return self.key + " " + str(self.id.value)
+        return self.key + " " + str(self.id.value) + " " + str(self.is_authorized)
 
 
 
@@ -45,6 +39,7 @@ GET_DETAIL_ERROR = "Music object doesn't exists."
 POST_ERROR = "MUSIC ADD FAILED"
 PUT_ERROR = "MUSIC UPDATE FAILED"
 DELETE_ERROR = "MUSIC DELETE FAILED"
+PERMISSION_ADD_ERROR = "You must be publisher, register on website."
 PERMISSION_ERROR = "You must be the publisher of this record."
 
 class AuthenticationService:
@@ -57,6 +52,7 @@ class AuthenticationService:
             raise ApiException(CONNECTION_ERROR)
         if res.status_code != 200:
             raise ApiException(LOGIN_ERROR)
+
         authenticated_user = mappers.AuthenticatedUserMapper.map_auth_user(res)
         return authenticated_user
 
@@ -120,6 +116,8 @@ class CDService:
                                 json=dict)
         except:
             raise ApiException(CONNECTION_ERROR)
+        if res.status_code == 403:
+            raise ApiException(PERMISSION_ADD_ERROR)
         if res.status_code != 201:
             raise ApiException(POST_ERROR)  ## todo bisogna leggere gli errori esatti e stamparli nella tui
         cd2 = mappers.CDMapper.map_cd(res.json())
@@ -136,6 +134,7 @@ class CDService:
                                json=dict)
         except:
             raise ApiException(CONNECTION_ERROR)
+
         if res.status_code == 403:
             raise ApiException(PERMISSION_ERROR)
         if res.status_code != 200:

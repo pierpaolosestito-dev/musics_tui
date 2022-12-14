@@ -94,6 +94,7 @@ class Menu:
             except AppException as k:
                  print(k)
             except Exception as e:
+                print(e)
                 print("Invalid selection. Please, try again...")
 
     def run(self) -> None:

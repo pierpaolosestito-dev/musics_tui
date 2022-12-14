@@ -4,6 +4,7 @@ import pwinput
 from rich.console import Console
 from rich.prompt import Prompt, Confirm
 from rich.table import Table
+from rich.text import Text
 
 from musics_library.domain import Username, Password, Name, Artist, RecordCompany, Genre, EANCode, Price, CD, \
     ID
@@ -64,6 +65,8 @@ class App:
     def __add_music(self):
         if self.authenticated_user == None:
             raise AppException("You must be logged.")
+        if not self.authenticated_user.is_authorized:
+            raise AppException(f"You must be publisher, register on {music_website}.")
         music = CD(*self.__read_cd_for_add())
         y_or_n = Confirm.ask("Are you sure?")
         if y_or_n:
@@ -74,6 +77,8 @@ class App:
     def __update_music(self):
         if self.authenticated_user == None:
             raise AppException("You must be logged.")
+        if not self.authenticated_user.is_authorized:
+            raise AppException(f"You must be publisher, register on {music_website}.")
         cd_id = self.__read('ID', ID.parse)
         cd = self.music_library.music(cd_id)
         self.__create_and_print_table_with_single_cd(cd)
@@ -83,6 +88,7 @@ class App:
         if y_or_n:
             music = CD(id=cd_id, name=cd_fields[0], artist=cd_fields[1], record_company=cd_fields[2],
                        genre=cd_fields[3], ean_code=cd_fields[4], price=cd_fields[5])
+            print(music)
             self.music_library.update_music(music, self.authenticated_user)
         else:
             self.console.print("Record will not be updated.")
@@ -90,6 +96,8 @@ class App:
     def __remove_music(self):
         if self.authenticated_user == None:
             raise AppException("You must be logged.")
+        if not self.authenticated_user.is_authorized:
+            raise AppException(f"You must be publisher, register on {music_website}.")
         cd_id = self.__read('ID', ID.parse)
         cd = self.music_library.music(cd_id)
 
@@ -171,7 +179,10 @@ class App:
     def __login(self):
         username, password = self.__read_user()
         self.authenticated_user = self.login_service.login(username, password)
-        print("Welcome " + self.authenticated_user.username.value)
+        print_sep = lambda: self.console.print("*" * len("Welcome ") + "*" * len(self.authenticated_user.username.value))
+        print_sep()
+        self.console.print(Text().append("Welcome " + self.authenticated_user.username.value, style="bold cyan"))
+        print_sep()
         self.__rerun_menu()
 
     def __logout(self):

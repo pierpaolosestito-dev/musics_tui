@@ -33,7 +33,7 @@ class Name:
     value: str
 
     def __post_init__(self):
-        validate('value', self.value, min_len=1, max_len=50, custom=pattern(r'[A-Za-z0-9- ,!@]*'))
+        validate('value', self.value, min_len=1, max_len=50, custom=pattern(r"[A-Za-z0-9- ,'!@]*"))
 
     def __str__(self):
         return self.value
