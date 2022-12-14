@@ -19,18 +19,9 @@ def test_dotenv(load_dotenv):
     assert os.getenv('AUTH_ENDPOINT') == "http://localhost:8000/api/v1/auth/"
 
 
-# def test_authenticated_user_is_singleton():
-#     a = AuthenticatedUser('eyJhbGciOiJIUzI1NiIsInR5c', ID(1), Username("ssdsbm28"))
-#     b = AuthenticatedUser()
-#     assert id(a) == id(b)
-#     assert a.key == b.key
-#     assert a.id == b.id
-#     assert a.username == b.username
-
-
 def test_str_authenticated_user():
     assert str(
-        AuthenticatedUser('eyJhbGciOiJIUzI1NiIsInR5c', ID(1), Username("ssdsbm28"))) == "eyJhbGciOiJIUzI1NiIsInR5c 1"
+        AuthenticatedUser('eyJhbGciOiJIUzI1NiIsInR5c', ID(1), Username("ssdsbm28"),True,True)) == "eyJhbGciOiJIUzI1NiIsInR5c 1 True"
 
 
 def test_musics_service_fetch_musics_detail_wrong_url_raises_exception(requests_mock):
@@ -108,7 +99,7 @@ def test_musics_services_by_cd_name_wrong_url_raises_api_exception(requests_mock
 
 def test_authentication_service_correct_login(requests_mock):
     requests_mock.post(url="http://localhost:8000/api/v1/auth/login/",
-                       json={"key": "abCde", "user": {"id": 1, "username": "ssdsbm"}})
+                       json={"key": "abCde", "user": {"id": 1, "username": "ssdsbm","is_superuser":True,"groups":[{"name":"publishers"}]}})
     auth_service = AuthenticationService()
     resp = auth_service.login(Username("sssbm"), Password("ssdsbm1234"))
     assert resp != None
@@ -118,7 +109,7 @@ def test_authentication_service_correct_logout(requests_mock):
     requests_mock.post(url="http://localhost:8000/api/v1/auth/logout/",
                        json="Logout successfull")
     auth_service = AuthenticationService()
-    resp = auth_service.logout(AuthenticatedUser("abCd", ID(1), Username("ssdsbm")))
+    resp = auth_service.logout(AuthenticatedUser("abCd", ID(1), Username("ssdsbm"),True,True))
     assert resp != None
 
 
@@ -135,7 +126,7 @@ def test_authentication_service_wrong_logout_raises_exception(requests_mock):
                        json={}, status_code=400)
     with pytest.raises(ApiException):
         auth_service = AuthenticationService()
-        resp = auth_service.logout(AuthenticatedUser("abCd", ID(1), Username("ssdsbm")))
+        resp = auth_service.logout(AuthenticatedUser("abCd", ID(1), Username("ssdsbm"),True,True))
 
 
 def test_musics_service_add_music_raises_exception(requests_mock):
@@ -159,6 +150,6 @@ def test_musics_service_add_music_raises_exception(requests_mock):
         resp = ms.add_cd(
             CD(id=ID(1), name=Name("Mod"), artist=Artist("Ciao"), record_company=RecordCompany("Ciao"),
                genre=Genre("Rock"), ean_code=EANCode("978020137962"), price=Price.parse("15.00")),
-            auth_user=AuthenticatedUser("kkbb", ID(1), Username("ciao")))
+            auth_user=AuthenticatedUser("kkbb", ID(1), Username("ciao"),True,True))
 
 
