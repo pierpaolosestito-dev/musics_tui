@@ -61,6 +61,7 @@ class Menu:
     __entries: List[Entry] = field(default_factory=list, repr=False, init=False)
     __key2entry: Dict[Key, Entry] = field(default_factory=dict, repr=False, init=False)
     create_key: InitVar[Any] = field(default=None)
+    is_running : bool = field(default=True)
 
     # noinspection PyMethodMayBeStatic
     def __post_init__(self, create_key: Any):
@@ -94,11 +95,13 @@ class Menu:
             except AppException as k:
                  print(k)
             except Exception as e:
-                print(e)
                 print("Invalid selection. Please, try again...")
 
+    def stop(self)->None:
+        object.__setattr__(self, "is_running", False)
+
     def run(self) -> None:
-        while True:
+        while self.is_running:
             self.__print()
             is_exit = self.__select_from_input()
             if is_exit:

@@ -52,8 +52,14 @@ class App:
                 Entry.create('8', 'Login', on_selected=lambda: self.__login()))
 
         menu_builder.with_entry(
-            Entry.create('0', 'Exit', on_selected=lambda: print('Music Library says you Goodbye!'), is_exit=True))
+            Entry.create('0', 'Exit', on_selected=lambda:self.__exit(), is_exit=True))
         return menu_builder.build()
+
+    def __exit(self):
+        y_or_n = Confirm.ask("Are you sure?")
+        if y_or_n:
+            self.console.print(Text().append("Music Library says you Goodbye!", style="bold cyan"))
+            self.authenticated_user = None
 
     def __invite_to_register_to_anonymous_user(self):
         if self.authenticated_user is None:
@@ -193,6 +199,7 @@ class App:
             self.__rerun_menu()
 
     def __rerun_menu(self):
+        self.menu.stop()
         self.menu = self.__create_menu()
         self.menu.run()
 
@@ -240,4 +247,3 @@ class App:
             print('Panic error!')
 
 
-App().run()
