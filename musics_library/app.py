@@ -87,7 +87,7 @@ class App:
             raise AppException(f"You must be publisher, register on {music_website}.")
         cd_id = self.__read('ID', ID.parse)
         cd = self.music_library.cd(cd_id)
-        self.__create_and_print_table_with_single_cd(cd)
+        self.__print_table_with_single_cd(cd)
         print("*** Leave the field blank if you don't want update an attribute. ***")
         cd_fields = self.__read_cd_for_update(cd)
         y_or_n = Confirm.ask("Are you sure?")
@@ -106,7 +106,7 @@ class App:
         cd_id = self.__read('ID', ID.parse)
         cd = self.music_library.cd(cd_id)
 
-        self.__create_and_print_table_with_single_cd(cd)
+        self.__print_table_with_single_cd(cd)
 
         y_or_n = Confirm.ask("Are you sure that you want delete this record?")
         if y_or_n:
@@ -114,7 +114,7 @@ class App:
         else:
             self.console.print("Record will not be deleted.")
 
-    def __create_and_print_table_with_single_cd(self, cd):
+    def __print_table_with_single_cd(self, cd):
         table = Table(title="CD " + str(cd.id))
         columns = ['#', 'NAME', 'ARTIST', 'RECORD COMPANY', 'GENRE', 'EANCODE', 'PRICE', 'PUBLISHED BY',
                    'CREATED AT', 'UPDATED AT']
