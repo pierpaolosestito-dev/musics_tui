@@ -29,7 +29,5 @@ class AuthenticatedUserMapper:
         is_publisher = False
         if {'name':'publishers'} in res.json()['user']['groups']:
             is_publisher = True
-        print(is_publisher)
-
         return services.AuthenticatedUser(res.json()["key"], ID(res.json()['user']['id']),
                                           Username(res.json()['user']['username']),res.json()['user']['is_superuser'],is_publisher)

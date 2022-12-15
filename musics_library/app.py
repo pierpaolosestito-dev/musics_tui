@@ -94,7 +94,6 @@ class App:
         if y_or_n:
             music = CD(id=cd_id, name=cd_fields[0], artist=cd_fields[1], record_company=cd_fields[2],
                        genre=cd_fields[3], ean_code=cd_fields[4], price=cd_fields[5])
-            print(music)
             self.music_library.update_music(music, self.authenticated_user)
         else:
             self.console.print("Record will not be updated.")

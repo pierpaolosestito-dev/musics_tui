@@ -74,7 +74,7 @@ class Menu:
         return bool(list(filter(lambda e: e.is_exit, self.__entries)))
 
     def __print(self) -> None:
-        tprint(self.description.value)
+
         self.auto_select()
         for entry in self.__entries:
             print(f'{entry.key}:\t{entry.description}')
@@ -98,6 +98,7 @@ class Menu:
         object.__setattr__(self, "is_running", False)
 
     def run(self) -> None:
+        tprint(self.description.value)
         while self.is_running:
             self.__print()
             is_exit = self.__select_from_input()
