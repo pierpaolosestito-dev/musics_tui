@@ -80,8 +80,7 @@ class CDService:
             "price": str(cd.price)
         }
 
-    def fetch_cd_list(
-            self):  # Lista di Musics -> un Array, o un List della libreria typing #TODO MIGLIORARE return e gestione errori
+    def fetch_cd_list(self):
         try:
             res = requests.get(url=music_endpoint)
         except:
@@ -92,8 +91,7 @@ class CDService:
         for i in res.json():
             cd = mappers.CDMapper.map_cd(i)
             cds.append(cd)
-
-        return cds  # TODO Deve essere una lista di Music
+        return cds
 
     def fetch_cd_detail(self, cd_id: ID):
         try:
@@ -119,7 +117,7 @@ class CDService:
         if res.status_code == 403:
             raise ApiException(PERMISSION_ADD_ERROR)
         if res.status_code != 201:
-            raise ApiException(POST_ERROR)  ## todo bisogna leggere gli errori esatti e stamparli nella tui
+            raise ApiException(POST_ERROR)
         cd2 = mappers.CDMapper.map_cd(res.json())
         return cd2
 
@@ -156,8 +154,7 @@ class CDService:
 
 class CDByArtistService():
     # http://localhost:8000/api/v1/musics/byartist?artist=ciccio
-    def fetch_cd_by_artist_list(self,
-                                artist_name: Artist):  # TODO Qua potremmo anche toglierlo auth_user perché le GET le facciamo fare anche a chi non è in possesso di un token.
+    def fetch_cd_by_artist_list(self, artist_name: Artist):
         try:
             res = requests.get(url=music_endpoint + "byartist?artist=" + artist_name.value)
         except:
