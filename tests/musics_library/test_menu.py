@@ -70,3 +70,12 @@ def test_menu_selection_on_wrong_key(mocked_print, mocked_input):
     menu.run()
     mocked_print.assert_any_call('Invalid selection. Please, try again...')
     mocked_input.assert_called()
+
+
+def test_stop_menu():
+    menu = Menu.Builder(Description('Test Menu')) \
+        .with_entry(Entry.create('1', 'first_entry', on_selected=lambda: print('first entry selected'))) \
+        .with_entry(Entry.create('0', 'exit', is_exit=True)) \
+        .build()
+    menu.stop()
+    assert not menu.is_running

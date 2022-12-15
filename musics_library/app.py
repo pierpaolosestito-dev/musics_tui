@@ -72,7 +72,7 @@ class App:
         if self.authenticated_user == None:
             raise AppException("You must be logged.")
         if not self.authenticated_user.is_authorized:
-            raise AppException(f"You must be publisher, register on {music_website}.")
+            raise AppException(f"You must be publisher, register as publisher on {music_website}.")
         music = CD(*self.__read_cd_for_add())
         y_or_n = Confirm.ask("Are you sure?")
         if y_or_n:
