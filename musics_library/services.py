@@ -35,10 +35,10 @@ CONNECTION_ERROR = "Check your network connection or retry later."
 LOGIN_ERROR = "Login not successfull"
 LOGOUT_ERROR = "Logout not successfull"
 GET_ERROR = "The desired operation has failed. Try later"
-GET_DETAIL_ERROR = "Music object doesn't exists."
-POST_ERROR = "MUSIC ADD FAILED"
-PUT_ERROR = "MUSIC UPDATE FAILED"
-DELETE_ERROR = "MUSIC DELETE FAILED"
+GET_DETAIL_ERROR = "CD object doesn't exists."
+POST_ERROR = "CD ADD FAILED"
+PUT_ERROR = "CD UPDATE FAILED"
+DELETE_ERROR = "CD DELETE FAILED"
 PERMISSION_ADD_ERROR = "You must be publisher, register on website."
 PERMISSION_ERROR = "You must be the publisher of this record."
 
@@ -67,7 +67,6 @@ class AuthenticationService:
 
 
 class CDService:
-    # musicslibrary.domain import Music
     authenticated_user = AuthenticatedUser
 
     def __to_dict(self, cd: CD):
@@ -186,7 +185,7 @@ class CDByPublishedByService():
 
 class CDByNameService():
     # http://localhost:8000/api/v1/musics/byname?name=ciccio
-    def fetch_musics_by_name_list(self, cd_name: Name):
+    def fetch_cds_by_name_list(self, cd_name: Name):
         try:
             res = requests.get(url=music_endpoint + "byname?name=" + cd_name.value)
         except:
@@ -205,30 +204,29 @@ class CDByNameService():
 class CDLibrary:
     cd_service: CDService = field(default_factory=CDService, init=False)
     cd_by_artists_service: CDByArtistService = field(default_factory=CDByArtistService, init=False)
-    cd_by_published_by_service: CDByPublishedByService = field(default_factory=CDByPublishedByService,
-                                                               init=False)
+    cd_by_published_by_service: CDByPublishedByService = field(default_factory=CDByPublishedByService,init=False)
     cd_by_name_service: CDByNameService = field(default_factory=CDByNameService, init=False)
 
-    def musics(self) -> 'List[CD]':
+    def cds(self) -> 'List[CD]':
         return self.cd_service.fetch_cd_list()
 
-    def music(self, id: ID) -> 'CD':
+    def cd(self, id: ID) -> 'CD':
         return self.cd_service.fetch_cd_detail(id)
 
-    def add_music(self, music: CD, auth_user: AuthenticatedUser) -> 'CD':
-        return self.cd_service.add_cd(music, auth_user)
+    def add_cd(self, cd: CD, auth_user: AuthenticatedUser) -> 'CD':
+        return self.cd_service.add_cd(cd, auth_user)
 
-    def update_music(self, music: CD, auth_user: AuthenticatedUser) -> bool:
-        return self.cd_service.update_cd(music, auth_user)
+    def update_cd(self, cd: CD, auth_user: AuthenticatedUser) -> bool:
+        return self.cd_service.update_cd(cd, auth_user)
 
-    def remove_music(self, id: ID, auth_user: AuthenticatedUser) -> bool:
+    def remove_cd(self, id: ID, auth_user: AuthenticatedUser) -> bool:
         return self.cd_service.remove_cd(id, auth_user)
 
-    def musics_by_artist(self, artist: Artist) -> 'List[CD]':
+    def cds_by_artist(self, artist: Artist) -> 'List[CD]':
         return self.cd_by_artists_service.fetch_cd_by_artist_list(artist)
 
-    def musics_by_published_by(self, published_by: Username) -> 'List[CD]':
+    def cds_by_published_by(self, published_by: Username) -> 'List[CD]':
         return self.cd_by_published_by_service.fetch_cd_by_published_by_list(published_by)
 
-    def musics_by_cd_name(self, cd_name: Name) -> 'List[CD]':
-        return self.cd_by_name_service.fetch_musics_by_name_list(cd_name)
+    def cds_by_cd_name(self, cd_name: Name) -> 'List[CD]':
+        return self.cd_by_name_service.fetch_cds_by_name_list(cd_name)

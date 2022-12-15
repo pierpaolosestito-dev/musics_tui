@@ -60,7 +60,7 @@ def test_musics_service_by_cd_name_fetch_musics_list(requests_mock):
     requests_mock.get("http://localhost:8000/api/v1/musics/byname?name=" + cd_name.value,
                       json="")
     ms = CDByNameService()
-    resp = ms.fetch_musics_by_name_list(cd_name)
+    resp = ms.fetch_cds_by_name_list(cd_name)
     assert resp != None
 
 
@@ -94,7 +94,7 @@ def test_musics_services_by_cd_name_wrong_url_raises_api_exception(requests_mock
         requests_mock.get("http://localhost:8000/api/v1/musics/bynamee?published_by=" + cd_name.value,
                           json="")
         ms = CDByNameService()
-        resp = ms.fetch_musics_by_name_list(cd_name)
+        resp = ms.fetch_cds_by_name_list(cd_name)
 
 
 def test_authentication_service_correct_login(requests_mock):

@@ -30,19 +30,19 @@ class App:
         menu_builder = Menu.Builder(
             Description("Music Library"), auto_select=lambda: self.__invite_to_register_to_anonymous_user()) \
             .with_entry(
-                Entry.create('1', 'Add CD', on_selected=lambda: self.__add_music())) \
+                Entry.create('1', 'Add CD', on_selected=lambda: self.__add_cd())) \
             .with_entry(
-                Entry.create('2', 'Remove CD', on_selected=lambda: self.__remove_music())) \
+                Entry.create('2', 'Remove CD', on_selected=lambda: self.__remove_cd())) \
             .with_entry(
-                Entry.create('3', 'Update a CD', on_selected=lambda: self.__update_music())) \
+                Entry.create('3', 'Update a CD', on_selected=lambda: self.__update_cd())) \
             .with_entry(
-                Entry.create('4', 'Get all CDs by Publisher', on_selected=lambda: self.__print_musics_by_published_by())) \
+                Entry.create('4', 'Get all CDs by Publisher', on_selected=lambda: self.__print_cds_by_published_by())) \
             .with_entry(
-                Entry.create('5', 'Get all CDs by CD Name', on_selected=lambda: self.__print_musics_by_cd_name())) \
+                Entry.create('5', 'Get all CDs by CD Name', on_selected=lambda: self.__print_cds_by_cd_name())) \
             .with_entry(
-                Entry.create('6', 'Get all CDs by Artist', on_selected=lambda: self.__print_musics_by_artist())) \
+                Entry.create('6', 'Get all CDs by Artist', on_selected=lambda: self.__print_cds_by_artist())) \
             .with_entry(
-                Entry.create('7', 'Get all CDs', on_selected=lambda: self.__print_musics()))
+                Entry.create('7', 'Get all CDs', on_selected=lambda: self.__print_all_cds()))
 
         if self.authenticated_user:
             menu_builder.with_entry(
@@ -68,7 +68,7 @@ class App:
     def __print_welcome(self) -> None:
         self.console.print("*** Welcome to ***")
 
-    def __add_music(self):
+    def __add_cd(self):
         if self.authenticated_user == None:
             raise AppException("You must be logged.")
         if not self.authenticated_user.is_authorized:
@@ -76,17 +76,17 @@ class App:
         music = CD(*self.__read_cd_for_add())
         y_or_n = Confirm.ask("Are you sure?")
         if y_or_n:
-            self.music_library.add_music(music, self.authenticated_user)
+            self.music_library.add_cd(music, self.authenticated_user)
         else:
             self.console.print("Music not added")
 
-    def __update_music(self):
+    def __update_cd(self):
         if self.authenticated_user == None:
             raise AppException("You must be logged.")
         if not self.authenticated_user.is_authorized:
             raise AppException(f"You must be publisher, register on {music_website}.")
         cd_id = self.__read('ID', ID.parse)
-        cd = self.music_library.music(cd_id)
+        cd = self.music_library.cd(cd_id)
         self.__create_and_print_table_with_single_cd(cd)
         print("*** Leave the field blank if you don't want update an attribute. ***")
         cd_fields = self.__read_cd_for_update(cd)
@@ -94,23 +94,23 @@ class App:
         if y_or_n:
             music = CD(id=cd_id, name=cd_fields[0], artist=cd_fields[1], record_company=cd_fields[2],
                        genre=cd_fields[3], ean_code=cd_fields[4], price=cd_fields[5])
-            self.music_library.update_music(music, self.authenticated_user)
+            self.music_library.update_cd(music, self.authenticated_user)
         else:
             self.console.print("Record will not be updated.")
 
-    def __remove_music(self):
+    def __remove_cd(self):
         if self.authenticated_user == None:
             raise AppException("You must be logged.")
         if not self.authenticated_user.is_authorized:
             raise AppException(f"You must be publisher, register on {music_website}.")
         cd_id = self.__read('ID', ID.parse)
-        cd = self.music_library.music(cd_id)
+        cd = self.music_library.cd(cd_id)
 
         self.__create_and_print_table_with_single_cd(cd)
 
         y_or_n = Confirm.ask("Are you sure that you want delete this record?")
         if y_or_n:
-            self.music_library.remove_music(cd_id, self.authenticated_user)
+            self.music_library.remove_cd(cd_id, self.authenticated_user)
         else:
             self.console.print("Record will not be deleted.")
 
@@ -126,37 +126,37 @@ class App:
 
         self.console.print(table)
 
-    def __create_and_print_table_with_list_of_cd(self, musics):
-        table = Table(title="Musics")
+    def __create_and_print_table_with_list_of_cd(self, cds):
+        table = Table(title="CDs")
         columns = ['#', 'NAME', 'ARTIST', 'RECORD COMPANY', 'GENRE', 'EANCODE', 'PRICE', 'PUBLISHED BY',
                    'CREATED AT', 'UPDATED AT']
         for col in columns:
             table.add_column(col, justify="center", style="cyan")
 
-        for cd in musics:
+        for cd in cds:
             table.add_row(str(cd.id.value), cd.name.value, cd.artist.value, cd.record_company.value, cd.genre.value,
                           cd.ean_code.value, str(cd.price),
                           cd.published_by.value, cd.createdat, cd.updatedat)
         self.console.print(table)
 
-    def __print_musics_by_artist(self):
+    def __print_cds_by_artist(self):
         artist = self.__read('Artist', Artist)
-        musics = self.music_library.musics_by_artist(artist)
-        self.__create_and_print_table_with_list_of_cd(musics)
+        cds = self.music_library.cds_by_artist(artist)
+        self.__create_and_print_table_with_list_of_cd(cds)
 
-    def __print_musics_by_published_by(self):
+    def __print_cds_by_published_by(self):
         published_by = self.__read('Username', Username)
-        musics = self.music_library.musics_by_published_by(published_by)
-        self.__create_and_print_table_with_list_of_cd(musics)
+        cds = self.music_library.cds_by_published_by(published_by)
+        self.__create_and_print_table_with_list_of_cd(cds)
 
-    def __print_musics_by_cd_name(self):
+    def __print_cds_by_cd_name(self):
         cd_name = self.__read('CD Name', Name)
-        musics = self.music_library.musics_by_cd_name(cd_name)
-        self.__create_and_print_table_with_list_of_cd(musics)
+        cds = self.music_library.cds_by_cd_name(cd_name)
+        self.__create_and_print_table_with_list_of_cd(cds)
 
-    def __print_musics(self) -> None:
-        musics = self.music_library.musics()
-        self.__create_and_print_table_with_list_of_cd(musics)
+    def __print_all_cds(self) -> None:
+        cds = self.music_library.cds()
+        self.__create_and_print_table_with_list_of_cd(cds)
 
     def __read_cd_for_update(self, cd: CD):
         name = self.__read_for_update("Name", cd.name.value, Name)
