@@ -73,10 +73,10 @@ class App:
             raise AppException("You must be logged.")
         if not self.authenticated_user.is_authorized:
             raise AppException(f"You must be publisher, register as publisher on {music_website}.")
-        music = CD(*self.__read_cd_for_add())
+        cd = CD(*self.__read_cd_for_add())
         y_or_n = Confirm.ask("Are you sure?")
         if y_or_n:
-            self.music_library.add_cd(music, self.authenticated_user)
+            self.music_library.add_cd(cd, self.authenticated_user)
         else:
             self.console.print("Music not added")
 
@@ -92,9 +92,9 @@ class App:
         cd_fields = self.__read_cd_for_update(cd)
         y_or_n = Confirm.ask("Are you sure?")
         if y_or_n:
-            music = CD(id=cd_id, name=cd_fields[0], artist=cd_fields[1], record_company=cd_fields[2],
+            cd_updated = CD(id=cd_id, name=cd_fields[0], artist=cd_fields[1], record_company=cd_fields[2],
                        genre=cd_fields[3], ean_code=cd_fields[4], price=cd_fields[5])
-            self.music_library.update_cd(music, self.authenticated_user)
+            self.music_library.update_cd(cd_updated, self.authenticated_user)
         else:
             self.console.print("Record will not be updated.")
 
